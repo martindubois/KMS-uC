@@ -1,0 +1,22 @@
+
+# Author    KMS - Martin Dubois, P. Eng.
+# Copyright (C) 2024 KMS
+# License   http://www.apache.org/licenses/LICENSE-2.0
+# Product   KMS-uC
+# File      Tests/MC56F/.gitignore
+
+# ===== CodeWarrior =========================================================
+
+.settings/
+Debugger/
+Documentation/
+FLASH_SDM/
+Generated_Code/
+
+.cwGeneratedFileSetLog
+
+ReferencedRSESystems.xml
+
+*.g_c
+*.g_x
+*.traceConfig
