@@ -1,0 +1,13 @@
+
+Author    KMS - Martin Dubois, P. Eng.
+Copyright (C) 2024 KMS
+License   http://www.apache.org/licenses/LICENSE-2.0
+Product   KMS-uC
+File      _DocUser/KMS-uC.ReadMe.txt
+
+1.0.0 2024-10-04
+- MC56F84565
+    - GPIO
+        - Configure function pin push-pull mode, pull-up/down, driver and
+          slew rate
+    - PWMA - PWM_MODE_OUTPUT tested

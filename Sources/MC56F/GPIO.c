@@ -5,6 +5,12 @@
 // Product   KMS-uC
 // File      Sources/MC56F/GPIO.c
 
+// CodeWarrior
+// //////////////////////////////////////////////////////////////////////////
+
+// Code
+// //////////////////////////////////////////////////////////////////////////
+
 // ===== C ==================================================================
 #include <stdint.h>
 #include <stdlib.h>
@@ -55,6 +61,11 @@ static const uint16_t SIM_PCE0_BITS[GPIO_PORT_QTY] =
     0x0001,
 };
 
+// Static function declarations
+// //////////////////////////////////////////////////////////////////////////
+
+static void Init(GPIO aD);
+
 // Functions
 // //////////////////////////////////////////////////////////////////////////
 
@@ -71,17 +82,11 @@ void GPIO_Init(GPIO aD)
     lM = ~ lB;
     lR = PORT_REGS + aD.mPort;
 
-    *SIM_PCE0 |= SIM_PCE0_BITS[aD.mPort];
+    Init(aD);
 
     lR->mPeripheral_Enable &= lM;
 
-    if (aD.mDrive            ) { lR->mDrive             |= lB; } else { lR->mDrive             &= lM; }
-    if (aD.mInterrupt_Falling) { lR->mInterrupt_Falling |= lB; } else { lR->mInterrupt_Falling &= lM; }
-    if (aD.mOutput           ) { lR->mOutput            |= lB; } else { lR->mOutput            &= lM; }
-    if (aD.mPullUp_Enable    ) { lR->mPullUp_Enable     |= lB; } else { lR->mPullUp_Enable     &= lM; }
-    if (aD.mPullUp_Select    ) { lR->mPullUp_Select     |= lB; } else { lR->mPullUp_Select     &= lM; }
-    if (aD.mPushPull         ) { lR->mPushPull          |= lB; } else { lR->mPushPull          &= lM; }
-    if (aD.mSlewRate_Slow    ) { lR->mSlewRate_Slow     |= lB; } else { lR->mSlewRate_Slow     &= lM; }
+    if (aD.mOutput) { lR->mOutput |= lB; } else { lR->mOutput &= lM; }
 }
 
 void GPIO_InitFunction(GPIO aD)
@@ -113,16 +118,16 @@ void GPIO_InitFunction(GPIO aD)
     case GPIO_PORT_D: lGPS = (7 >= aD.mBit) ? SIM_GPSDL : NULL     ; break;
     }
 
-    *SIM_PCE0 |= SIM_PCE0_BITS[aD.mPort];
-
-    lR->mPeripheral_Enable |= lB;
-    lR->mPushPull          &= lM;
-
     if (NULL != lGPS)
     {
         *lGPS &= ~ (0x3 << lS2);
         *lGPS |= aD.mFunction << lS2;
     }
+
+    Init(aD);
+
+    lR->mOutput            &= lM;
+    lR->mPeripheral_Enable |= lB;
 }
 
 uint8_t GPIO_Input(GPIO aD)
@@ -202,4 +207,30 @@ void GPIO_Output(GPIO aD, uint8_t aVal)
     {
         lR->mData &= ~ lB;
     }
+}
+
+// Static function declarations
+// //////////////////////////////////////////////////////////////////////////
+
+void Init(GPIO aD)
+{
+    // assert(BIT_PER_PORT > aD.mBit);
+    // assert(GPIO_PORT_QTY > aD.mPort);
+
+    uint16_t           lB;
+    uint16_t           lM;
+    volatile PortRegs* lR;
+
+    lB = 1 << aD.mBit;
+    lM = ~ lB;
+    lR = PORT_REGS + aD.mPort;
+
+    *SIM_PCE0 |= SIM_PCE0_BITS[aD.mPort];
+
+    if (aD.mDrive            ) { lR->mDrive             |= lB; } else { lR->mDrive             &= lM; }
+    if (aD.mInterrupt_Falling) { lR->mInterrupt_Falling |= lB; } else { lR->mInterrupt_Falling &= lM; }
+    if (aD.mPullUp_Enable    ) { lR->mPullUp_Enable     |= lB; } else { lR->mPullUp_Enable     &= lM; }
+    if (aD.mPullUp_Select    ) { lR->mPullUp_Select     |= lB; } else { lR->mPullUp_Select     &= lM; }
+    if (aD.mPushPull         ) { lR->mPushPull          |= lB; } else { lR->mPushPull          &= lM; }
+    if (aD.mSlewRate_Slow    ) { lR->mSlewRate_Slow     |= lB; } else { lR->mSlewRate_Slow     &= lM; }
 }

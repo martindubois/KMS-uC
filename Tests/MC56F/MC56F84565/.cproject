@@ -25,7 +25,7 @@
 					<folderInfo id="com.freescale.dsc.cdt.toolchain.config.debug.1803030186." name="/" resourcePath="">
 						<toolChain errorParsers="" id="com.freescale.dsc.cdt.toolchain.debug.414943299" name="DSC Toolchain" superClass="com.freescale.dsc.cdt.toolchain.debug">
 							<targetPlatform id="com.freescale.dsc.cdt.toolchain.targetPlatform.1512680712" isAbstract="false" name="DSC Target Platform" superClass="com.freescale.dsc.cdt.toolchain.targetPlatform"/>
-							<builder buildPath="${ProjDirPath}/FLASH_SDM" errorParsers="org.eclipse.cdt.core.GmakeErrorParser;com.freescale.core.ide.cdt.errorParsers.LltErrorParser;com.freescale.core.ide.cdt.errorParsers.AsmErrorParser;com.freescale.core.ide.cdt.errorParsers.IcodeErrorParser;com.freescale.core.ide.cdt.errorParsers.CobjErrorParser;com.freescale.core.ide.cdt.errorParsers.MwErrorParser;com.freescale.core.ide.cdt.errorParsers.MPWErrorParser;com.freescale.core.ide.cdt.errorParsers.MwfeErrorParser;com.freescale.core.ide.cdt.errorParsers.LnkErrorParser" id="com.freescale.dsc.cdt.toolchain.builder.151596617" keepEnvironmentInBuildfile="false" name="GNU Make Builder" parallelBuildOn="true" parallelizationNumber="optimal" superClass="com.freescale.dsc.cdt.toolchain.builder"/>
+							<builder buildPath="${ProjDirPath}/FLASH_SDM" errorParsers="org.eclipse.cdt.core.GmakeErrorParser;com.freescale.core.ide.cdt.errorParsers.LltErrorParser;com.freescale.core.ide.cdt.errorParsers.AsmErrorParser;com.freescale.core.ide.cdt.errorParsers.IcodeErrorParser;com.freescale.core.ide.cdt.errorParsers.CobjErrorParser;com.freescale.core.ide.cdt.errorParsers.MwErrorParser;com.freescale.core.ide.cdt.errorParsers.MPWErrorParser;com.freescale.core.ide.cdt.errorParsers.MwfeErrorParser;com.freescale.core.ide.cdt.errorParsers.LnkErrorParser" id="com.freescale.dsc.cdt.toolchain.builder.151596617" keepEnvironmentInBuildfile="false" name="GNU Make Builder" parallelBuildOn="true" parallelBuildWorkspaceOn="true" parallelizationNumber="optimal" superClass="com.freescale.dsc.cdt.toolchain.builder"/>
 							<tool errorParsers="" id="com.freescale.dsc.cdt.toolchain.linker.872892392" name="DSC Linker" superClass="com.freescale.dsc.cdt.toolchain.linker">
 								<option id="com.freescale.dsc.cdt.toolchain.linker.input.libSearch.380535866" name="Library Search Paths (-L)" superClass="com.freescale.dsc.cdt.toolchain.linker.input.libSearch" valueType="libPaths">
 									<listOptionValue builtIn="false" value="&quot;${MCUToolsBaseDir}/M56800E Support/msl/MSL_C++/DSP_56800E/lib&quot;"/>
@@ -59,7 +59,7 @@
 									<listOptionValue builtIn="false" value="&quot;${MCUToolsBaseDir}/M56800E Support&quot;"/>
 								</option>
 								<option id="com.freescale.dsc.cdt.toolchain.compiler.processor.generates56800EX.406037734" name="Generates elf file for 56800EX core" superClass="com.freescale.dsc.cdt.toolchain.compiler.processor.generates56800EX" value="true" valueType="boolean"/>
-								<option id="com.freescale.dsc.cdt.toolchain.compiler.macros.definedMacros.1588985579" superClass="com.freescale.dsc.cdt.toolchain.compiler.macros.definedMacros" valueType="definedSymbols">
+								<option id="com.freescale.dsc.cdt.toolchain.compiler.macros.definedMacros.1588985579" name="Defined Macros" superClass="com.freescale.dsc.cdt.toolchain.compiler.macros.definedMacros" valueType="definedSymbols">
 									<listOptionValue builtIn="false" value="_MC56F84565_"/>
 								</option>
 								<inputType id="com.freescale.dsc.cdt.toolchain.compiler.inputType.c.272666464" name="DSC C Compiler Input" superClass="com.freescale.dsc.cdt.toolchain.compiler.inputType.c"/>
@@ -80,7 +80,8 @@
 					</folderInfo>
 					<fileInfo id="com.freescale.dsc.cdt.toolchain.config.debug.1803030186..settings/com.freescale.processorexpert.core.prefs" name="com.freescale.processorexpert.core.prefs" rcbsApplicability="disable" resourcePath=".settings/com.freescale.processorexpert.core.prefs" toolsToInvoke=""/>
 					<sourceEntries>
-						<entry excluding=".settings/com.freescale.processorexpert.core.prefs" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
+						<entry excluding="Common|.settings/com.freescale.processorexpert.core.prefs" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
+						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Common"/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>
@@ -108,7 +109,7 @@
 					<folderInfo id="com.freescale.dsc.cdt.toolchain.config.debug.432059067." name="/" resourcePath="">
 						<toolChain errorParsers="" id="com.freescale.dsc.cdt.toolchain.debug.1763545334" name="DSC Toolchain" superClass="com.freescale.dsc.cdt.toolchain.debug">
 							<targetPlatform id="com.freescale.dsc.cdt.toolchain.targetPlatform.14484408" isAbstract="false" name="DSC Target Platform" superClass="com.freescale.dsc.cdt.toolchain.targetPlatform"/>
-							<builder buildPath="${ProjDirPath}/FLASH_LDM" errorParsers="org.eclipse.cdt.core.GmakeErrorParser;com.freescale.core.ide.cdt.errorParsers.LltErrorParser;com.freescale.core.ide.cdt.errorParsers.AsmErrorParser;com.freescale.core.ide.cdt.errorParsers.IcodeErrorParser;com.freescale.core.ide.cdt.errorParsers.CobjErrorParser;com.freescale.core.ide.cdt.errorParsers.MwErrorParser;com.freescale.core.ide.cdt.errorParsers.MPWErrorParser;com.freescale.core.ide.cdt.errorParsers.MwfeErrorParser;com.freescale.core.ide.cdt.errorParsers.LnkErrorParser" id="com.freescale.dsc.cdt.toolchain.builder.802921946" keepEnvironmentInBuildfile="false" name="GNU Make Builder" superClass="com.freescale.dsc.cdt.toolchain.builder"/>
+							<builder buildPath="${ProjDirPath}/FLASH_LDM" errorParsers="org.eclipse.cdt.core.GmakeErrorParser;com.freescale.core.ide.cdt.errorParsers.LltErrorParser;com.freescale.core.ide.cdt.errorParsers.AsmErrorParser;com.freescale.core.ide.cdt.errorParsers.IcodeErrorParser;com.freescale.core.ide.cdt.errorParsers.CobjErrorParser;com.freescale.core.ide.cdt.errorParsers.MwErrorParser;com.freescale.core.ide.cdt.errorParsers.MPWErrorParser;com.freescale.core.ide.cdt.errorParsers.MwfeErrorParser;com.freescale.core.ide.cdt.errorParsers.LnkErrorParser" id="com.freescale.dsc.cdt.toolchain.builder.802921946" keepEnvironmentInBuildfile="false" name="GNU Make Builder" parallelBuildWorkspaceOn="true" superClass="com.freescale.dsc.cdt.toolchain.builder"/>
 							<tool errorParsers="" id="com.freescale.dsc.cdt.toolchain.linker.2001453413" name="DSC Linker" superClass="com.freescale.dsc.cdt.toolchain.linker">
 								<option id="com.freescale.dsc.cdt.toolchain.linker.input.libSearch.599630548" name="Library Search Paths (-L)" superClass="com.freescale.dsc.cdt.toolchain.linker.input.libSearch" valueType="libPaths">
 									<listOptionValue builtIn="false" value="&quot;${MCUToolsBaseDir}/M56800E Support/msl/MSL_C++/DSP_56800E/lib&quot;"/>
@@ -162,7 +163,8 @@
 					</folderInfo>
 					<fileInfo id="com.freescale.dsc.cdt.toolchain.config.debug.432059067..settings/com.freescale.processorexpert.core.prefs" name="com.freescale.processorexpert.core.prefs" rcbsApplicability="disable" resourcePath=".settings/com.freescale.processorexpert.core.prefs" toolsToInvoke=""/>
 					<sourceEntries>
-						<entry excluding=".settings/com.freescale.processorexpert.core.prefs" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
+						<entry excluding="Common|.settings/com.freescale.processorexpert.core.prefs" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
+						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Common"/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>

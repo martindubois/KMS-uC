@@ -3,8 +3,8 @@
   <Header>
     <Name>MC56F84565</Name>
     <SavedBy>mdubois</SavedBy>
-    <ModificationStamp>2</ModificationStamp>
-    <Date>2024-09-25</Date>
+    <ModificationStamp>5</ModificationStamp>
+    <Date>2024-10-04</Date>
     <IDE>Eclipse IDE</IDE>
     <PEversion>1.9.2.RT6_b1446-0504</PEversion>
   </Header>
@@ -29,7 +29,7 @@
     <UseExistingModules>true</UseExistingModules>
     <RenamePeripheries>false</RenamePeripheries>
     <Autodependency>true</Autodependency>
-    <ProjectCompNumb>8</ProjectCompNumb>
+    <ProjectCompNumb>11</ProjectCompNumb>
     <DelUnusedPreviouslyGenFiles>true</DelUnusedPreviouslyGenFiles>
     <GeneratedCodeFrozen>false</GeneratedCodeFrozen>
     <AssignInitComponentNameToPrph>true</AssignInitComponentNameToPrph>
@@ -633,7 +633,7 @@
       <ItemState>
         <ListItemCount>2</ListItemCount>
         <ItemSymbol>FlashOrgDscrBlockList</ItemSymbol>
-        <Expanded>false</Expanded>
+        <Expanded>true</Expanded>
       </ItemState>
       <ItemState>
         <ItemSymbol>FlashOrgDscrBlock0</ItemSymbol>
@@ -6294,6 +6294,7 @@
         <ReadOnly>false</ReadOnly>
         <UserReadOnly>false</UserReadOnly>
         <Expanded>false</Expanded>
+        <ItemWasNeverEnabledInChgScript>true</ItemWasNeverEnabledInChgScript>
       </ItemState>
       <ItemState>
         <ItemSymbol>EEPROMAvailable</ItemSymbol>
@@ -6380,7 +6381,7 @@
       <ItemState>
         <ListItemCount>2</ListItemCount>
         <ItemSymbol>FlashOrgDscrBlockList</ItemSymbol>
-        <Expanded>false</Expanded>
+        <Expanded>true</Expanded>
       </ItemState>
       <ItemState>
         <ItemSymbol>FlashOrgDscrBlock0</ItemSymbol>
@@ -6859,6 +6860,7 @@
       <ItemState>
         <ItemSymbol>Symbol1</ItemSymbol>
         <ListItemCount>1</ListItemCount>
+        <ItemWasNeverEnabledInChgScript>true</ItemWasNeverEnabledInChgScript>
       </ItemState>
       <ItemState>
         <ItemSymbol>SIMGrp</ItemSymbol>
@@ -11546,11 +11548,15 @@
       <Count>0</Count>
     </BoolList_FpgaConfig>
     <BoolList_BeanConfig>
-      <Count>2</Count>
-      <ItemId0>2</ItemId0>
+      <Count>4</Count>
+      <ItemId0>9</ItemId0>
       <Value0>true</Value0>
-      <ItemId1>4</ItemId1>
-      <Value1>false</Value1>
+      <ItemId1>2</ItemId1>
+      <Value1>true</Value1>
+      <ItemId2>4</ItemId2>
+      <Value2>false</Value2>
+      <ItemId3>10</ItemId3>
+      <Value3>true</Value3>
     </BoolList_BeanConfig>
     <BoolList_TaskConfig>
       <Count>0</Count>
@@ -11625,11 +11631,15 @@
       <Count>0</Count>
     </BoolList_FpgaConfig>
     <BoolList_BeanConfig>
-      <Count>2</Count>
-      <ItemId0>2</ItemId0>
+      <Count>4</Count>
+      <ItemId0>9</ItemId0>
       <Value0>true</Value0>
-      <ItemId1>4</ItemId1>
-      <Value1>false</Value1>
+      <ItemId1>2</ItemId1>
+      <Value1>true</Value1>
+      <ItemId2>4</ItemId2>
+      <Value2>false</Value2>
+      <ItemId3>10</ItemId3>
+      <Value3>true</Value3>
     </BoolList_BeanConfig>
     <BoolList_TaskConfig>
       <Count>0</Count>
@@ -11694,5 +11704,135 @@
       <Value>false</Value>
     </ItemState>
   </Configuration>
+  <Bean>
+    <BeanType>InterruptVector</BeanType>
+    <Name>INT_eFlexPWMA_CAP</Name>
+    <CompNumb>9</CompNumb>
+    <CompEnabled>true</CompEnabled>
+    <GenCodeMode>ALWAYS_WRITE</GenCodeMode>
+    <IconName>PERIPHINSP</IconName>
+    <UserFolderName />
+    <Comment lines_count="0" />
+    <Template />
+    <BeanVersion>02.023</BeanVersion>
+    <LightErrorsIgnored>false</LightErrorsIgnored>
+    <Properties>
+      <ItemState>
+        <ItemSymbol>DeviceName</ItemSymbol>
+        <ReadOnly>false</ReadOnly>
+        <UserReadOnly>false</UserReadOnly>
+        <Value>INT_eFlexPWMA_CAP</Value>
+      </ItemState>
+      <ItemState>
+        <ItemSymbol>Vector</ItemSymbol>
+        <ReadOnly>false</ReadOnly>
+        <UserReadOnly>false</UserReadOnly>
+        <Value>INT_eFlexPWMA_CAP</Value>
+      </ItemState>
+      <ItemState>
+        <ItemSymbol>InitPriority</ItemSymbol>
+        <ReadOnly>false</ReadOnly>
+        <UserReadOnly>false</UserReadOnly>
+        <PropertyModelIsAutomatic>false</PropertyModelIsAutomatic>
+        <Value>medium priority</Value>
+      </ItemState>
+      <ItemState>
+        <ItemSymbol>ShrInt</ItemSymbol>
+        <ReadOnly>true</ReadOnly>
+        <UserReadOnly>false</UserReadOnly>
+        <PropertyModelIsAutomatic>false</PropertyModelIsAutomatic>
+        <Value>false</Value>
+        <Expanded>false</Expanded>
+      </ItemState>
+      <ItemState>
+        <ItemSymbol>IntSrc</ItemSymbol>
+        <ReadOnly>false</ReadOnly>
+        <UserReadOnly>false</UserReadOnly>
+        <Value />
+        <SharedPrphMode>false</SharedPrphMode>
+      </ItemState>
+      <ItemState>
+        <ItemSymbol>Handle</ItemSymbol>
+        <ReadOnly>false</ReadOnly>
+        <UserReadOnly>false</UserReadOnly>
+        <Value>PWMA_Interrupt_CAP</Value>
+      </ItemState>
+      <ItemState>
+        <ItemSymbol>AllowDuplicates</ItemSymbol>
+        <ReadOnly>false</ReadOnly>
+        <UserReadOnly>false</UserReadOnly>
+        <PropertyModelIsAutomatic>false</PropertyModelIsAutomatic>
+        <Index>1</Index>
+        <Value>false</Value>
+      </ItemState>
+    </Properties>
+    <Methods />
+    <Events />
+  </Bean>
+  <Bean>
+    <BeanType>InterruptVector</BeanType>
+    <Name>INT_ADC12_CC0</Name>
+    <CompNumb>10</CompNumb>
+    <CompEnabled>true</CompEnabled>
+    <GenCodeMode>ALWAYS_WRITE</GenCodeMode>
+    <IconName>PERIPHINSP</IconName>
+    <UserFolderName />
+    <Comment lines_count="0" />
+    <Template />
+    <BeanVersion>02.023</BeanVersion>
+    <LightErrorsIgnored>false</LightErrorsIgnored>
+    <Properties>
+      <ItemState>
+        <ItemSymbol>DeviceName</ItemSymbol>
+        <ReadOnly>false</ReadOnly>
+        <UserReadOnly>false</UserReadOnly>
+        <Value>INT_ADC12_CC0</Value>
+      </ItemState>
+      <ItemState>
+        <ItemSymbol>Vector</ItemSymbol>
+        <ReadOnly>false</ReadOnly>
+        <UserReadOnly>false</UserReadOnly>
+        <Value>INT_ADC12_CC0</Value>
+      </ItemState>
+      <ItemState>
+        <ItemSymbol>InitPriority</ItemSymbol>
+        <ReadOnly>false</ReadOnly>
+        <UserReadOnly>false</UserReadOnly>
+        <PropertyModelIsAutomatic>false</PropertyModelIsAutomatic>
+        <Value>medium priority</Value>
+      </ItemState>
+      <ItemState>
+        <ItemSymbol>ShrInt</ItemSymbol>
+        <ReadOnly>true</ReadOnly>
+        <UserReadOnly>false</UserReadOnly>
+        <PropertyModelIsAutomatic>false</PropertyModelIsAutomatic>
+        <Value>false</Value>
+        <Expanded>false</Expanded>
+      </ItemState>
+      <ItemState>
+        <ItemSymbol>IntSrc</ItemSymbol>
+        <ReadOnly>false</ReadOnly>
+        <UserReadOnly>false</UserReadOnly>
+        <Value />
+        <SharedPrphMode>false</SharedPrphMode>
+      </ItemState>
+      <ItemState>
+        <ItemSymbol>Handle</ItemSymbol>
+        <ReadOnly>false</ReadOnly>
+        <UserReadOnly>false</UserReadOnly>
+        <Value>ADC12_Interrupt_CC0</Value>
+      </ItemState>
+      <ItemState>
+        <ItemSymbol>AllowDuplicates</ItemSymbol>
+        <ReadOnly>false</ReadOnly>
+        <UserReadOnly>false</UserReadOnly>
+        <PropertyModelIsAutomatic>false</PropertyModelIsAutomatic>
+        <Index>1</Index>
+        <Value>false</Value>
+      </ItemState>
+    </Properties>
+    <Methods />
+    <Events />
+  </Bean>
 </PEproject>
 
