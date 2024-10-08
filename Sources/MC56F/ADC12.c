@@ -5,6 +5,11 @@
 // Product   KMS-uC
 // File      Sources/MC56F/ADC12.c
 
+// Assumptions
+// //////////////////////////////////////////////////////////////////////////
+//
+// - The system clock (IP Bus) is 80 MHz
+
 // CodeWarrior
 // //////////////////////////////////////////////////////////////////////////
 //
@@ -124,7 +129,7 @@ void ADC_Init(const uint8_t* aChannel, uint8_t aChannelQty, uint8_t aInterrupts)
 
         if (aChannelQty > i)
         {
-            if (0 == (aChannel[i] & ADC_SIGNED))
+            if (0 != (aChannel[i] & ADC_SIGNED))
             {
                 REGS->mOffsets[i] = 0x4000;
             }
@@ -139,7 +144,7 @@ void ADC_Init(const uint8_t* aChannel, uint8_t aChannelQty, uint8_t aInterrupts)
         }
     }
 
-    REGS->mPowerCtrl1        = 0x001a2; // PUDELAY = 01 1010 = 26 clock, PD0
+    REGS->mPowerCtrl1        = 0x001a0; // PUDELAY = 01 1010 = 26 clock
 
     // Clear status
     REGS->mLowLimitStatus     = 0xffff;
@@ -151,7 +156,7 @@ void ADC_Init(const uint8_t* aChannel, uint8_t aChannelQty, uint8_t aInterrupts)
 
     REGS->mCtrl1 = lCtrl1;
 
-    while (REGS->mPowerCtrl1 & 0x0400) {} // PSTS0
+    while (REGS->mPowerCtrl1 & 0x0c00) {} // PTS1, PSTS0
 
     lCtrl1 |= 0x2000; // START0
 
