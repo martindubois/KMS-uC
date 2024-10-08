@@ -22,7 +22,8 @@
 
 static uint8_t ADC_CHANNELS[] =
 {
-    0
+    0  | ADC_SIGNED,
+    14 | ADC_SIGNED,
 };
 
 static GPIO ANALOG_0;
@@ -75,7 +76,9 @@ void Test_Main()
     PWM_Start(0);
     PWM_Start(1);
 
-    PWM_Set(0, 250, 500);
+    PWM_Set(0, 0, 300);
+
+    PWM_Set2(0, 250, 500);
 
     for (;;)
     {

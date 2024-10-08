@@ -266,7 +266,31 @@ void PWM_Init(uint8_t aIndex, uint8_t aMode)
     // COMMON_REGS->mFaultControl1  = 0; // Default E1
 }
 
-void PWM_Set(uint8_t aIndex, uint16_t aDutyCycleA, uint16_t aDutyCycleB)
+void PWM_Set(uint8_t aIndex, uint8_t aOutput, uint16_t aDutyCycle)
+{
+    // assert(PWMA_QTY > aIndex);
+
+    uint16_t              lMasterControl;
+    volatile ChannelRegs* lR = CHANNEL_REGS + aIndex;
+
+    lMasterControl = COMMON_REGS->mMasterControl;
+
+    COMMON_REGS->mMasterControl = lMasterControl | (MCTRL_CLDOK0 << aIndex);
+
+    switch (aOutput)
+    {
+    case 0: lR->mValue3 = aDutyCycle * 4; break;
+    case 1: lR->mValue5 = aDutyCycle * 4; break;
+
+    // default: assert(false);
+    }
+
+    lMasterControl = COMMON_REGS->mMasterControl;
+
+    COMMON_REGS->mMasterControl = lMasterControl | (MCTRL_LDOK0 << aIndex);
+}
+
+void PWM_Set2(uint8_t aIndex, uint16_t aDutyCycleA, uint16_t aDutyCycleB)
 {
     // assert(PWMA_QTY > aIndex);
 

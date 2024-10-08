@@ -27,10 +27,16 @@ extern void PWMs_Init();
 // aMode   See PWMA_MODE_...
 extern void PWM_Init(uint8_t aIndex, uint8_t aMode);
 
+// aOutput     0  Output A
+//             1  Output B
+// aDutyCycle  0    =   0 % = always off (stopped)
+//             1000 = 100 % = always on
+extern void PWM_Set(uint8_t aIndex, uint8_t aOutput, uint16_t aDutyCycle);
+
 // aDutyCycleA  0    =   0 % = always off (stopped)
 //              1000 = 100 % = always on
 // aDutyCycleB
-extern void PWM_Set(uint8_t aIndex, uint16_t aDutyCycleA, uint16_t aDutyCycleB);
+extern void PWM_Set2(uint8_t aIndex, uint16_t aDutyCycleA, uint16_t aDutyCycleB);
 
 // aInput  0  Input A
 //         1  Input B
