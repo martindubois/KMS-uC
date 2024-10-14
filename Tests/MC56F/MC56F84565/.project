@@ -40,6 +40,21 @@
 			<locationURI>PARENT-3-PROJECT_LOC/Sources/MC56F/GPIO.c</locationURI>
 		</link>
 		<link>
+			<name>Common/I2C.c</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/Sources/MC56F/I2C.c</locationURI>
+		</link>
+		<link>
+			<name>Common/Modbus_CRC.c</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/Sources/Modbus_CRC.c</locationURI>
+		</link>
+		<link>
+			<name>Common/Modbus_Slave.c</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/Sources/Modbus_Slave.c</locationURI>
+		</link>
+		<link>
 			<name>Common/PWMA.c</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/Sources/MC56F/PWMA.c</locationURI>
@@ -48,6 +63,11 @@
 			<name>Common/QSCI.c</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/Sources/MC56F/QSCI.c</locationURI>
+		</link>
+		<link>
+			<name>Common/Thermocouple.c</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/Sources/Thermocouple.c</locationURI>
 		</link>
 		<link>
 			<name>Common/Tick.c</name>

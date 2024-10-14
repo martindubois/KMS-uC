@@ -3,7 +3,14 @@
 // Copyright (C) 2024 KMS
 // License   http://www.apache.org/licenses/LICENSE-2.0
 // Product   KMS-uC
-// File      Sources/MC56F/PWMA.c
+// File      Sources/MC56F/QSCI.c
+
+// References
+// //////////////////////////////////////////////////////////////////////////
+//
+// MC56F8458x Reference Manual with Addendum
+// https://www.nxp.com/docs/en/reference-manual/MC56F8458XRM.pdf
+// Chapter 35 - Queued Serial Communication Interface (QSCI)
 
 // Assumption
 // //////////////////////////////////////////////////////////////////////////
@@ -17,11 +24,20 @@
 // - Define _MC56F84565_
 //
 // Processor Expert Configuration
+// - For each used QSCI port
+//    - Add an InterruptVector INT_QSCIx_RERR (Receive ERRor) associated to
+//      QSCIx_Interrupt_RERR
+//    - Add an InterruptVector INT_QSCIx_RCV (ReCeiVe) associated to
+//      QSCIx_Interrupt_RCV
+//    - Add an InterruptVector INT_QSCIx_TIDLE (Transmit IDLE) associated to
+//      QSCIx_Interrupt_TIDLE
+//    - Add an InterruptVector INT_QSCIx_TDRE (Transmit Data Register Empty)
+//      associated to QSCIx_Interrupt_TDRE
 
 // Code
 // //////////////////////////////////////////////////////////////////////////
 //
-// - Configure Input/Output pin using GPIO_InitFunction
+// - Configure input (Rx) and output (Tx) pins using GPIO_InitFunction
 
 // ===== C ==================================================================
 #include <stdint.h>
@@ -135,54 +151,54 @@ static void Start_Z0(HalfContext* aThisH, void* aInOut, uint8_t aSize_byte);
 // Entry points
 // //////////////////////////////////////////////////////////////////////////
 
-void SCI0_Interrupt_RERR ();
-void SCI0_Interrupt_RCV  ();
-void SCI0_Interrupt_TIDLE();
-void SCI0_Interrupt_TDRE ();
-void SCI1_Interrupt_RERR ();
-void SCI1_Interrupt_RCV  ();
-void SCI1_Interrupt_TIDLE();
-void SCI1_Interrupt_TDRE ();
-void SCI2_Interrupt_RERR ();
-void SCI2_Interrupt_RCV  ();
-void SCI2_Interrupt_TIDLE();
-void SCI2_Interrupt_TDRE ();
+void QSCI0_Interrupt_RERR ();
+void QSCI0_Interrupt_RCV  ();
+void QSCI0_Interrupt_TIDLE();
+void QSCI0_Interrupt_TDRE ();
+void QSCI1_Interrupt_RERR ();
+void QSCI1_Interrupt_RCV  ();
+void QSCI1_Interrupt_TIDLE();
+void QSCI1_Interrupt_TDRE ();
+void QSCI2_Interrupt_RERR ();
+void QSCI2_Interrupt_RCV  ();
+void QSCI2_Interrupt_TIDLE();
+void QSCI2_Interrupt_TDRE ();
 
 #pragma interrupt alignsp saveall
-void SCI0_Interrupt_RERR() { Interrupt_RERR_Z0(sContexts + 0); }
+void QSCI0_Interrupt_RERR() { Interrupt_RERR_Z0(sContexts + 0); }
 
 #pragma interrupt alignsp saveall
-void SCI0_Interrupt_RCV() { Interrupt_RCV_Z0(sContexts + 0); }
+void QSCI0_Interrupt_RCV() { Interrupt_RCV_Z0(sContexts + 0); }
 
 #pragma interrupt alignsp saveall
-void SCI0_Interrupt_TIDLE() { Interrupt_TIDLE_Z0(sContexts + 0); }
+void QSCI0_Interrupt_TIDLE() { Interrupt_TIDLE_Z0(sContexts + 0); }
 
 #pragma interrupt alignsp saveall
-void SCI0_Interrupt_TDRE() { Interrupt_TDRE_Z0(sContexts + 0); }
+void QSCI0_Interrupt_TDRE() { Interrupt_TDRE_Z0(sContexts + 0); }
 
 #pragma interrupt alignsp saveall
-void SCI1_Interrupt_RERR() { Interrupt_RERR_Z0(sContexts + 1); }
+void QSCI1_Interrupt_RERR() { Interrupt_RERR_Z0(sContexts + 1); }
 
 #pragma interrupt alignsp saveall
-void SCI1_Interrupt_RCV() { Interrupt_RCV_Z0(sContexts + 1); }
+void QSCI1_Interrupt_RCV() { Interrupt_RCV_Z0(sContexts + 1); }
 
 #pragma interrupt alignsp saveall
-void SCI1_Interrupt_TIDLE() { Interrupt_TIDLE_Z0(sContexts + 1); }
+void QSCI1_Interrupt_TIDLE() { Interrupt_TIDLE_Z0(sContexts + 1); }
 
 #pragma interrupt alignsp saveall
-void SCI1_Interrupt_TDRE() { Interrupt_TDRE_Z0(sContexts + 1); }
+void QSCI1_Interrupt_TDRE() { Interrupt_TDRE_Z0(sContexts + 1); }
 
 #pragma interrupt alignsp saveall
-void SCI2_Interrupt_RERR() { Interrupt_RERR_Z0(sContexts + 2); }
+void QSCI2_Interrupt_RERR() { Interrupt_RERR_Z0(sContexts + 2); }
 
 #pragma interrupt alignsp saveall
-void SCI2_Interrupt_RCV() { Interrupt_RCV_Z0(sContexts + 2); }
+void QSCI2_Interrupt_RCV() { Interrupt_RCV_Z0(sContexts + 2); }
 
 #pragma interrupt alignsp saveall
-void SCI2_Interrupt_TIDLE() { Interrupt_TIDLE_Z0(sContexts + 2); }
+void QSCI2_Interrupt_TIDLE() { Interrupt_TIDLE_Z0(sContexts + 2); }
 
 #pragma interrupt alignsp saveall
-void SCI2_Interrupt_TDRE() { Interrupt_TDRE_Z0(sContexts + 2); }
+void QSCI2_Interrupt_TDRE() { Interrupt_TDRE_Z0(sContexts + 2); }
 
 // Functions
 // //////////////////////////////////////////////////////////////////////////
