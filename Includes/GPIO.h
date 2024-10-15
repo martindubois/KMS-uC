@@ -43,6 +43,14 @@ extern void GPIO_Init(GPIO aDesc);
 
 extern void GPIO_InitFunction(GPIO aDesc);
 
+// Retrieve the register address and mask, normaly to be passed to
+// Debounced_Init.
+//
+// aDesc  GPIO Descriptor
+// aReg   The function puts the register address there
+// aMask  The function puts the mask there
+extern void GPIO_GetRegisterAndMask(GPIO aDesc, volatile uint16_t** aReg, uint16_t* aMask);
+
 // Return  false
 //         true
 extern uint8_t GPIO_Input(GPIO aDesc);
@@ -53,6 +61,7 @@ extern void GPIO_Interrupt_Disable(GPIO aDesc);
 
 extern void GPIO_Interrupt_Enable(GPIO aDesc);
 
+// aDesc   GPIO Descriptor
 // aValue  false
 //         true
 extern void GPIO_Output(GPIO aDesc, uint8_t aValue);
