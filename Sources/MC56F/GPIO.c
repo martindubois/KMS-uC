@@ -66,7 +66,7 @@ PortRegs;
 
 static volatile PortRegs* PORT_REGS = (PortRegs*)0x0000E200;
 
-static const uint16_t SIM_PCE0_BITS[GPIO_PORT_QTY] =
+static const uint16_t SIM_PCE0_BITS[GPIO_PORT_DUMMY] =
 {
     0x0040,
     0x0020,
@@ -88,140 +88,158 @@ static void Init(GPIO aD);
 void GPIO_Init(GPIO aD)
 {
     // assert(BIT_PER_PORT > aD.mBit);
-    // assert(GPIO_PORT_QTY > aD.mPort);
 
-    uint16_t           lB;
-    uint16_t           lM;
-    volatile PortRegs* lR;
+    if (GPIO_PORT_DUMMY > aD.mPort)
+    {
+        uint16_t           lB;
+        uint16_t           lM;
+        volatile PortRegs* lR;
 
-    lB = 1 << aD.mBit;
-    lM = ~ lB;
-    lR = PORT_REGS + aD.mPort;
+        lB = 1 << aD.mBit;
+        lM = ~ lB;
+        lR = PORT_REGS + aD.mPort;
 
-    Init(aD);
+        Init(aD);
 
-    lR->mPeripheral_Enable &= lM;
+        lR->mPeripheral_Enable &= lM;
 
-    if (aD.mOutput) { lR->mOutput |= lB; } else { lR->mOutput &= lM; }
+        if (aD.mOutput) { lR->mOutput |= lB; } else { lR->mOutput &= lM; }
+    }
 }
 
 void GPIO_InitFunction(GPIO aD)
 {
     // assert(BIT_PER_PORT > aD.mBit);
-    // assert(GPIO_PORT_QTY > aD.mPort);
 
-    uint16_t           lB;
-    volatile uint16_t* lGPS = NULL;
-    uint16_t           lM;
-    volatile PortRegs* lR;
-    unsigned int       lS2;
-
-    lB  = 1 << aD.mBit;
-    lM  = ~ lB;
-    lR  = PORT_REGS + aD.mPort;
-    lS2 = 2 * aD.mBit;
-
-    if (8 <= aD.mBit)
+    if (GPIO_PORT_DUMMY > aD.mPort)
     {
-        lS2 -= BIT_PER_PORT;
+        uint16_t           lB;
+        volatile uint16_t* lGPS = NULL;
+        uint16_t           lM;
+        volatile PortRegs* lR;
+        unsigned int       lS2;
+
+        lB  = 1 << aD.mBit;
+        lM  = ~ lB;
+        lR  = PORT_REGS + aD.mPort;
+        lS2 = 2 * aD.mBit;
+
+        if (8 <= aD.mBit)
+        {
+            lS2 -= BIT_PER_PORT;
+        }
+
+        switch (aD.mPort)
+        {
+        case GPIO_PORT_A: lGPS = (7 >= aD.mBit) ? SIM_GPSAL : NULL     ; break;
+        case GPIO_PORT_B: lGPS = (7 >= aD.mBit) ? NULL      : SIM_GPSBH; break;
+        case GPIO_PORT_C: lGPS = (7 >= aD.mBit) ? SIM_GPSCL : SIM_GPSCH; break;
+        case GPIO_PORT_D: lGPS = (7 >= aD.mBit) ? SIM_GPSDL : NULL     ; break;
+        }
+
+        if (NULL != lGPS)
+        {
+            *lGPS &= ~ (0x3 << lS2);
+            *lGPS |= aD.mFunction << lS2;
+        }
+
+        Init(aD);
+
+        lR->mOutput            &= lM;
+        lR->mPeripheral_Enable |= lB;
     }
-
-    switch (aD.mPort)
-    {
-    case GPIO_PORT_A: lGPS = (7 >= aD.mBit) ? SIM_GPSAL : NULL     ; break;
-    case GPIO_PORT_B: lGPS = (7 >= aD.mBit) ? NULL      : SIM_GPSBH; break;
-    case GPIO_PORT_C: lGPS = (7 >= aD.mBit) ? SIM_GPSCL : SIM_GPSCH; break;
-    case GPIO_PORT_D: lGPS = (7 >= aD.mBit) ? SIM_GPSDL : NULL     ; break;
-    }
-
-    if (NULL != lGPS)
-    {
-        *lGPS &= ~ (0x3 << lS2);
-        *lGPS |= aD.mFunction << lS2;
-    }
-
-    Init(aD);
-
-    lR->mOutput            &= lM;
-    lR->mPeripheral_Enable |= lB;
 }
 
 uint8_t GPIO_Input(GPIO aD)
 {
     // assert(BIT_PER_PORT > aD.mBit);
-    // assert(GPIO_PORT_QTY > aD.mPort);
 
-    uint16_t           lB;
-    volatile PortRegs* lR;
+    uint8_t lResult = 0;
 
-    lB = 1 << aD.mBit;
-    lR = PORT_REGS + aD.mPort;
+    if (GPIO_PORT_DUMMY > aD.mPort)
+    {
+        uint16_t           lB;
+        volatile PortRegs* lR;
 
-    return 0 != (lR->mData & lB);
+        lB = 1 << aD.mBit;
+        lR = PORT_REGS + aD.mPort;
+
+        lResult = (0 != (lR->mData & lB));
+    }
+
+    return lResult;
 }
 
 void GPIO_Interrupt_Acknowledge(GPIO aD)
 {
     // assert(BIT_PER_PORT > aD.mBit);
-    // assert(GPIO_PORT_QTY > aD.mPort);
 
-    uint16_t           lB;
-    volatile PortRegs* lR;
+    if (GPIO_PORT_DUMMY > aD.mPort)
+    {
+        uint16_t           lB;
+        volatile PortRegs* lR;
 
-    lB = 1 << aD.mBit;
-    lR = PORT_REGS + aD.mPort;
+        lB = 1 << aD.mBit;
+        lR = PORT_REGS + aD.mPort;
 
-    lR->mInterrupt_EdgeDetected = lB;
+        lR->mInterrupt_EdgeDetected = lB;
+    }
 }
 
 void GPIO_Interrupt_Disable(GPIO aD)
 {
     // assert(BIT_PER_PORT > aD.mBit);
-    // assert(GPIO_PORT_QTY > aD.mPort);
 
-    uint16_t           lB;
-    uint16_t           lM;
-    volatile PortRegs* lR;
+    if (GPIO_PORT_DUMMY > aD.mPort)
+    {
+        uint16_t           lB;
+        uint16_t           lM;
+        volatile PortRegs* lR;
 
-    lB = 1 << aD.mBit;
-    lM = ~ lB;
-    lR = PORT_REGS + aD.mPort;
+        lB = 1 << aD.mBit;
+        lM = ~ lB;
+        lR = PORT_REGS + aD.mPort;
 
-    lR->mInterrupt_Enable &= lM;
+        lR->mInterrupt_Enable &= lM;
+    }
 }
 
 void GPIO_Interrupt_Enable(GPIO aD)
 {
     // assert(BIT_PER_PORT > aD.mBit);
-    // assert(GPIO_PORT_QTY > aD.mPort);
 
-    uint16_t           lB;
-    volatile PortRegs* lR;
+    if (GPIO_PORT_DUMMY > aD.mPort)
+    {
+        uint16_t           lB;
+        volatile PortRegs* lR;
 
-    lB = 1 << aD.mBit;
-    lR = PORT_REGS + aD.mPort;
+        lB = 1 << aD.mBit;
+        lR = PORT_REGS + aD.mPort;
 
-    lR->mInterrupt_Enable |= lB;
+        lR->mInterrupt_Enable |= lB;
+    }
 }
 
 void GPIO_Output(GPIO aD, uint8_t aVal)
 {
     // assert(BIT_PER_PORT > aD.mBit);
-    // assert(GPIO_PORT_QTY > aD.mPort);
 
-    uint16_t           lB;
-    volatile PortRegs* lR;
-
-    lB = 1 << aD.mBit;
-    lR = PORT_REGS + aD.mPort;
-
-    if (aVal)
+    if (GPIO_PORT_DUMMY > aD.mPort)
     {
-        lR->mData |=   lB;
-    }
-    else
-    {
-        lR->mData &= ~ lB;
+        uint16_t           lB;
+        volatile PortRegs* lR;
+
+        lB = 1 << aD.mBit;
+        lR = PORT_REGS + aD.mPort;
+
+        if (aVal)
+        {
+            lR->mData |=   lB;
+        }
+        else
+        {
+            lR->mData &= ~ lB;
+        }
     }
 }
 
@@ -231,7 +249,7 @@ void GPIO_Output(GPIO aD, uint8_t aVal)
 void Init(GPIO aD)
 {
     // assert(BIT_PER_PORT > aD.mBit);
-    // assert(GPIO_PORT_QTY > aD.mPort);
+    // assert(GPIO_PORT_DUMMY > aD.mPort);
 
     uint16_t           lB;
     uint16_t           lM;

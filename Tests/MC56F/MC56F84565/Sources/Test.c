@@ -18,6 +18,12 @@
 // ==== Local ===============================================================
 #include "Test.h"
 
+// Configuration
+// //////////////////////////////////////////////////////////////////////////
+
+#define _BOARD_NK_E1_CTRL_
+// #define _BOARD_UNKNOWN_
+
 // Variables
 // //////////////////////////////////////////////////////////////////////////
 
@@ -33,6 +39,7 @@ static uint8_t ADC_CHANNELS[] =
 };
 
 static GPIO ANALOG_0;
+static GPIO ANALOG_14;
 
 static GPIO MODBUS_OUTPUT_ENABLE;
 static GPIO MODBUS_RX;
@@ -65,30 +72,42 @@ void Test_Init0()
     ANALOG_0.mBit  = 0;
     ANALOG_0.mPort = GPIO_PORT_A;
 
+    ANALOG_14.mBit  = 6;
+    ANALOG_14.mPort = GPIO_PORT_B;
+
     MODBUS_OUTPUT_ENABLE.mBit           = 9;
     MODBUS_OUTPUT_ENABLE.mOutput        = 1;
-    MODBUS_OUTPUT_ENABLE.mPort          = GPIO_PORT_C;
     MODBUS_OUTPUT_ENABLE.mPushPull      = 1;
     MODBUS_OUTPUT_ENABLE.mSlewRate_Slow = 1;
 
     MODBUS_RX.mBit      = 8;
-    MODBUS_RX.mFunction = 1;
     MODBUS_RX.mPort     = GPIO_PORT_C;
+    MODBUS_RX.mFunction = 1;
 
     MODBUS_TX.mBit           = 7;
     MODBUS_TX.mFunction      = 1;
     MODBUS_TX.mOutput        = 1;
-    MODBUS_TX.mPort          = GPIO_PORT_C;
     MODBUS_TX.mSlewRate_Slow = 1;
 
     PWMA_0_A.mBit           = 1;
-    PWMA_0_A.mPort          = GPIO_PORT_E;
     PWMA_0_A.mOutput        = 1;
     PWMA_0_A.mPushPull      = 1;
     PWMA_0_A.mSlewRate_Slow = 1;
 
     PWMA_1_A.mBit  = 3;
     PWMA_1_A.mPort = GPIO_PORT_E;
+
+    #ifdef _BOARD_NK_E1_CTRL_
+        MODBUS_OUTPUT_ENABLE.mPort = GPIO_PORT_C;
+        MODBUS_TX           .mPort = GPIO_PORT_C;
+        PWMA_0_A            .mPort = GPIO_PORT_E;
+    #endif
+
+    #ifdef _BOARD_UNKNOWN_
+        MODBUS_OUTPUT_ENABLE.mPort = GPIO_PORT_DUMMY;
+        MODBUS_TX           .mPort = GPIO_PORT_DUMMY;
+        PWMA_0_A            .mPort = GPIO_PORT_DUMMY;
+    #endif
 }
 
 void Test_Main()

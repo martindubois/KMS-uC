@@ -34,7 +34,7 @@ GPIO;
 #define GPIO_PORT_F (5)
 #define GPIO_PORT_G (6)
 
-#define GPIO_PORT_QTY (7)
+#define GPIO_PORT_DUMMY (7)
 
 // Functions
 // //////////////////////////////////////////////////////////////////////////
