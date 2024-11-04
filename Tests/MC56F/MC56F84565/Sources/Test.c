@@ -17,6 +17,7 @@
 #include "Modbus_Slave.h"
 #include "PWM.h"
 #include "Tick.h"
+#include "Watchdog.h"
 
 // ==== Local ===============================================================
 #include "Test.h"
@@ -180,6 +181,8 @@ void Test_Main()
     #endif
 
     Tick_Init(80000000);
+
+    Watchdog_Disable();
 
     for (;;)
     {

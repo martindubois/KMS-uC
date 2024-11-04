@@ -38,7 +38,6 @@
 #include "INT_QSCI0_TDRE.h"
 #include "INT_GPIOC.h"
 #include "INT_IIC1.h"
-#include "COP.h"
 /* Including shared modules, which are used for whole project */
 #include "PE_Types.h"
 #include "PE_Error.h"

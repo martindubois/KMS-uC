@@ -3,7 +3,7 @@
   <Header>
     <Name>MC56F84565</Name>
     <SavedBy>mdubois</SavedBy>
-    <ModificationStamp>17</ModificationStamp>
+    <ModificationStamp>19</ModificationStamp>
     <Date>2024-11-04</Date>
     <IDE>Eclipse IDE</IDE>
     <PEversion>1.9.2.RT6_b1446-0504</PEversion>
@@ -29,7 +29,7 @@
     <UseExistingModules>true</UseExistingModules>
     <RenamePeripheries>false</RenamePeripheries>
     <Autodependency>true</Autodependency>
-    <ProjectCompNumb>24</ProjectCompNumb>
+    <ProjectCompNumb>27</ProjectCompNumb>
     <DelUnusedPreviouslyGenFiles>true</DelUnusedPreviouslyGenFiles>
     <GeneratedCodeFrozen>false</GeneratedCodeFrozen>
     <AssignInitComponentNameToPrph>true</AssignInitComponentNameToPrph>
@@ -11548,7 +11548,7 @@
       <Count>0</Count>
     </BoolList_FpgaConfig>
     <BoolList_BeanConfig>
-      <Count>11</Count>
+      <Count>10</Count>
       <ItemId0>9</ItemId0>
       <Value0>true</Value0>
       <ItemId1>2</ItemId1>
@@ -11569,8 +11569,6 @@
       <Value8>true</Value8>
       <ItemId9>22</ItemId9>
       <Value9>true</Value9>
-      <ItemId10>23</ItemId10>
-      <Value10>true</Value10>
     </BoolList_BeanConfig>
     <BoolList_TaskConfig>
       <Count>0</Count>
@@ -11645,7 +11643,7 @@
       <Count>0</Count>
     </BoolList_FpgaConfig>
     <BoolList_BeanConfig>
-      <Count>11</Count>
+      <Count>10</Count>
       <ItemId0>9</ItemId0>
       <Value0>true</Value0>
       <ItemId1>2</ItemId1>
@@ -11666,8 +11664,6 @@
       <Value8>true</Value8>
       <ItemId9>22</ItemId9>
       <Value9>true</Value9>
-      <ItemId10>23</ItemId10>
-      <Value10>true</Value10>
     </BoolList_BeanConfig>
     <BoolList_TaskConfig>
       <Count>0</Count>
@@ -12250,260 +12246,6 @@
       </ItemState>
     </Properties>
     <Methods />
-    <Events />
-  </Bean>
-  <Bean>
-    <BeanType>Init_COP_56800</BeanType>
-    <Name>COP</Name>
-    <CompNumb>23</CompNumb>
-    <CompEnabled>true</CompEnabled>
-    <GenCodeMode>ALWAYS_WRITE</GenCodeMode>
-    <IconName>PERIPHINSP</IconName>
-    <UserFolderName />
-    <Comment lines_count="0" />
-    <Template />
-    <BeanVersion>01.002</BeanVersion>
-    <LightErrorsIgnored>false</LightErrorsIgnored>
-    <Properties>
-      <ItemState>
-        <ItemSymbol>DeviceName</ItemSymbol>
-        <ReadOnly>false</ReadOnly>
-        <UserReadOnly>false</UserReadOnly>
-        <Value>COP</Value>
-      </ItemState>
-      <ItemState>
-        <ItemSymbol>PeriphDevice</ItemSymbol>
-        <ReadOnly>false</ReadOnly>
-        <UserReadOnly>false</UserReadOnly>
-        <Value>COP</Value>
-        <SharedPrphMode>false</SharedPrphMode>
-      </ItemState>
-      <ItemState>
-        <ItemSymbol>SettingsGrp</ItemSymbol>
-        <ReadOnly>false</ReadOnly>
-        <UserReadOnly>false</UserReadOnly>
-        <Expanded>true</Expanded>
-      </ItemState>
-      <ItemState>
-        <ItemSymbol>ClockSettingsGrp</ItemSymbol>
-        <ReadOnly>false</ReadOnly>
-        <UserReadOnly>false</UserReadOnly>
-        <Expanded>true</Expanded>
-      </ItemState>
-      <ItemState>
-        <ItemSymbol>ClockSelect</ItemSymbol>
-        <ReadOnly>false</ReadOnly>
-        <UserReadOnly>false</UserReadOnly>
-        <PropertyModelIsAutomatic>false</PropertyModelIsAutomatic>
-        <Index>0</Index>
-        <EnumSymbVal>relax</EnumSymbVal>
-      </ItemState>
-      <ItemState>
-        <ItemSymbol>Prescaler</ItemSymbol>
-        <ReadOnly>false</ReadOnly>
-        <UserReadOnly>false</UserReadOnly>
-        <PropertyModelIsAutomatic>false</PropertyModelIsAutomatic>
-        <TypeSpecNameState>typePrescaler</TypeSpecNameState>
-        <Index>3</Index>
-        <EnumSymbVal>3</EnumSymbVal>
-      </ItemState>
-      <ItemState>
-        <ItemSymbol>Frequency</ItemSymbol>
-        <Value>7.812 kHz</Value>
-      </ItemState>
-      <ItemState>
-        <ItemSymbol>Timeout</ItemSymbol>
-        <ReadOnly>false</ReadOnly>
-        <UserReadOnly>false</UserReadOnly>
-        <PropertyModelIsAutomatic>false</PropertyModelIsAutomatic>
-        <Value>65535</Value>
-        <Base>DEC</Base>
-      </ItemState>
-      <ItemState>
-        <ItemSymbol>Period</ItemSymbol>
-        <Value>8388.4800 ms</Value>
-      </ItemState>
-      <ItemState>
-        <ItemSymbol>IntValue</ItemSymbol>
-        <ReadOnly>false</ReadOnly>
-        <UserReadOnly>false</UserReadOnly>
-        <PropertyModelIsAutomatic>false</PropertyModelIsAutomatic>
-        <Value>255</Value>
-        <Base>DEC</Base>
-      </ItemState>
-      <ItemState>
-        <ItemSymbol>IntPeriod</ItemSymbol>
-        <Value>32.6400 ms</Value>
-      </ItemState>
-      <ItemState>
-        <ItemSymbol>WindowTimeoutFeatureCondGroup</ItemSymbol>
-        <ReadOnly>false</ReadOnly>
-        <UserReadOnly>false</UserReadOnly>
-      </ItemState>
-      <ItemState>
-        <ItemSymbol>WindowTimeout</ItemSymbol>
-        <ReadOnly>false</ReadOnly>
-        <UserReadOnly>false</UserReadOnly>
-        <PropertyModelIsAutomatic>false</PropertyModelIsAutomatic>
-        <Value>65535</Value>
-        <ItemWasNeverEnabledInChgScript>true</ItemWasNeverEnabledInChgScript>
-        <Base>DEC</Base>
-      </ItemState>
-      <ItemState>
-        <ItemSymbol>WindowFeatureCondGroup</ItemSymbol>
-        <ReadOnly>false</ReadOnly>
-        <UserReadOnly>false</UserReadOnly>
-      </ItemState>
-      <ItemState>
-        <ItemSymbol>Window</ItemSymbol>
-        <Value />
-        <ItemWasNeverEnabledInChgScript>true</ItemWasNeverEnabledInChgScript>
-      </ItemState>
-      <ItemState>
-        <ItemSymbol>LossRef</ItemSymbol>
-        <ReadOnly>false</ReadOnly>
-        <UserReadOnly>false</UserReadOnly>
-        <PropertyModelIsAutomatic>false</PropertyModelIsAutomatic>
-        <TypeSpecNameState>typeLossRef</TypeSpecNameState>
-        <Index>0</Index>
-        <EnumSymbVal>disabled</EnumSymbVal>
-      </ItemState>
-      <ItemState>
-        <ItemSymbol>StopMode</ItemSymbol>
-        <ReadOnly>false</ReadOnly>
-        <UserReadOnly>false</UserReadOnly>
-        <PropertyModelIsAutomatic>false</PropertyModelIsAutomatic>
-        <TypeSpecNameState>typeStopMode</TypeSpecNameState>
-        <Index>0</Index>
-        <EnumSymbVal>disabled</EnumSymbVal>
-      </ItemState>
-      <ItemState>
-        <ItemSymbol>WaitMode</ItemSymbol>
-        <ReadOnly>false</ReadOnly>
-        <UserReadOnly>false</UserReadOnly>
-        <PropertyModelIsAutomatic>false</PropertyModelIsAutomatic>
-        <TypeSpecNameState>typeWaitMode</TypeSpecNameState>
-        <Index>0</Index>
-        <EnumSymbVal>disabled</EnumSymbVal>
-      </ItemState>
-      <ItemState>
-        <ItemSymbol>InterruptsGrp</ItemSymbol>
-        <ReadOnly>false</ReadOnly>
-        <UserReadOnly>false</UserReadOnly>
-        <Expanded>false</Expanded>
-      </ItemState>
-      <ItemState>
-        <ItemSymbol>COPwarningeGrp</ItemSymbol>
-        <ReadOnly>false</ReadOnly>
-        <UserReadOnly>false</UserReadOnly>
-        <Expanded>true</Expanded>
-      </ItemState>
-      <ItemState>
-        <ItemSymbol>IntCOP</ItemSymbol>
-        <Value>INT_COP_INT</Value>
-      </ItemState>
-      <ItemState>
-        <ItemSymbol>IntCOPPExPriorityFeatureGroup</ItemSymbol>
-        <ReadOnly>false</ReadOnly>
-        <UserReadOnly>false</UserReadOnly>
-      </ItemState>
-      <ItemState>
-        <ItemSymbol>IntCOPPExPriority</ItemSymbol>
-        <ReadOnly>false</ReadOnly>
-        <UserReadOnly>false</UserReadOnly>
-        <PropertyModelIsAutomatic>false</PropertyModelIsAutomatic>
-        <Value>default</Value>
-      </ItemState>
-      <ItemState>
-        <ItemSymbol>ISRHandleCOP</ItemSymbol>
-        <ReadOnly>false</ReadOnly>
-        <UserReadOnly>false</UserReadOnly>
-        <Value />
-      </ItemState>
-      <ItemState>
-        <ItemSymbol>IntEnable</ItemSymbol>
-        <ReadOnly>false</ReadOnly>
-        <UserReadOnly>false</UserReadOnly>
-        <PropertyModelIsAutomatic>false</PropertyModelIsAutomatic>
-        <TypeSpecNameState>typeIntEnable</TypeSpecNameState>
-        <Index>0</Index>
-        <EnumSymbVal>disabled</EnumSymbVal>
-      </ItemState>
-      <ItemState>
-        <ItemSymbol>InitializationGroup</ItemSymbol>
-        <ReadOnly>false</ReadOnly>
-        <UserReadOnly>false</UserReadOnly>
-        <Expanded>true</Expanded>
-      </ItemState>
-      <ItemState>
-        <ItemSymbol>enableCOP</ItemSymbol>
-        <ReadOnly>false</ReadOnly>
-        <UserReadOnly>false</UserReadOnly>
-        <PropertyModelIsAutomatic>false</PropertyModelIsAutomatic>
-        <TypeSpecNameState>typeenableCOP</TypeSpecNameState>
-        <Index>1</Index>
-        <EnumSymbVal>disabled</EnumSymbVal>
-      </ItemState>
-      <ItemState>
-        <ItemSymbol>WriteProtect</ItemSymbol>
-        <ReadOnly>false</ReadOnly>
-        <UserReadOnly>false</UserReadOnly>
-        <PropertyModelIsAutomatic>false</PropertyModelIsAutomatic>
-        <TypeSpecNameState>typeWriteProtect</TypeSpecNameState>
-        <Index>1</Index>
-        <EnumSymbVal>disabled</EnumSymbVal>
-      </ItemState>
-      <ItemState>
-        <ItemSymbol>NON_MCU_INIT</ItemSymbol>
-        <ReadOnly>false</ReadOnly>
-        <UserReadOnly>false</UserReadOnly>
-      </ItemState>
-      <ItemState>
-        <ItemSymbol>InitEnable</ItemSymbol>
-        <ReadOnly>false</ReadOnly>
-        <UserReadOnly>false</UserReadOnly>
-        <PropertyModelIsAutomatic>false</PropertyModelIsAutomatic>
-        <Index>0</Index>
-        <Value>true</Value>
-      </ItemState>
-      <ItemState>
-        <ItemSymbol>UtilizeResetValuesCondGroup</ItemSymbol>
-        <ReadOnly>false</ReadOnly>
-        <UserReadOnly>false</UserReadOnly>
-      </ItemState>
-      <ItemState>
-        <ItemSymbol>UtilizeResetValues</ItemSymbol>
-        <ReadOnly>false</ReadOnly>
-        <UserReadOnly>false</UserReadOnly>
-        <PropertyModelIsAutomatic>false</PropertyModelIsAutomatic>
-        <ItemWasNeverEnabledInChgScript>true</ItemWasNeverEnabledInChgScript>
-        <Index>0</Index>
-        <EnumSymbVal>default</EnumSymbVal>
-      </ItemState>
-      <ItemState>
-        <ItemSymbol>COPInternalUsageGrp</ItemSymbol>
-        <ReadOnly>false</ReadOnly>
-        <UserReadOnly>false</UserReadOnly>
-        <Expanded>true</Expanded>
-      </ItemState>
-      <ItemState>
-        <ItemSymbol>IsInitialized</ItemSymbol>
-        <PropertyModelIsAutomatic>false</PropertyModelIsAutomatic>
-        <Index>0</Index>
-        <Value>true</Value>
-      </ItemState>
-    </Properties>
-    <Methods>
-      <ItemState>
-        <ItemSymbol>Init</ItemSymbol>
-        <PropertyModelIsAutomatic>false</PropertyModelIsAutomatic>
-        <Index>0</Index>
-        <Value>true</Value>
-        <LastSelection>true</LastSelection>
-        <LastUserSel>always</LastUserSel>
-        <UsrMethodName>Init</UsrMethodName>
-      </ItemState>
-    </Methods>
     <Events />
   </Bean>
 </PEproject>
