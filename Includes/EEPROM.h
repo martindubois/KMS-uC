@@ -41,7 +41,16 @@ EEPROM;
 
 // aBusIndex       Index of the I2C port
 // aDeviceAddress  I2C device address
-// aWriteProtect   The write protect pin. Use GPIO_PORT_DUMMY if not needed.
+// aWriteProtect   The write protect pin.
+//                     .mBit
+//                     .mDrive
+//                     .mInterrupt_Falling
+//                     .mOutput            : Ignored, must be an output
+//                     .mPort              : See GPIO_PORT_...
+//                     .mPull_Enable
+//                     .mPullUp_Select
+//                     .mPushPull
+//                     .mSlewRate_Slow     : Ignored, must be set
 extern void EEPROM_Init(EEPROM* aThis, uint8_t aBusIndex, uint8_t aDeviceAddress, GPIO aWriteProtect);
 
 extern void EEPROM_Erase(EEPROM* aThis, uint16_t aAddress, uint16_t aSize_byte);

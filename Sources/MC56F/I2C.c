@@ -127,6 +127,8 @@ GPIOs;
 
 static volatile PortRegs* PORT_REGS = (PortRegs*)0x0000E0E0;
 
+static uint8_t FUNCTION_TABLE[I2C_QTY] = { 0, 1 };
+
 static GPIOs GPIO_TABLE[I2C_QTY];
 
 static const uint16_t SIM_PCE1_BITS[I2C_QTY] = { 0x0040, 0x0020 };
@@ -178,15 +180,15 @@ void I2Cs_Init0()
     GPIO_TABLE[0].mSCL.mBit = 15;
     GPIO_TABLE[0].mSDA.mBit = 14;
 
-    GPIO_TABLE[1].mSCL.mBit      = 11;
-    GPIO_TABLE[1].mSCL.mFunction =  1;
-    GPIO_TABLE[1].mSDA.mBit      = 12;
-    GPIO_TABLE[1].mSDA.mFunction =  1;
+    GPIO_TABLE[1].mSCL.mBit = 11;
+    GPIO_TABLE[1].mSDA.mBit = 12;
 
     for (i = 0; i < I2C_QTY; i++)
     {
-        GPIO_TABLE[i].mSCL.mPort = GPIO_PORT_C;
-        GPIO_TABLE[i].mSDA.mPort = GPIO_PORT_C;
+        GPIO_TABLE[i].mSCL.mDrive = 1;
+        GPIO_TABLE[i].mSCL.mPort  = GPIO_PORT_C;
+        GPIO_TABLE[i].mSDA.mDrive = 1;
+        GPIO_TABLE[i].mSDA.mPort  = GPIO_PORT_C;
 
         sContexts[i].mIndex = i;
     }    
@@ -198,8 +200,8 @@ void I2C_Init(uint8_t aIndex)
 
     volatile PortRegs* lR = PORT_REGS + aIndex;
 
-    GPIO_InitFunction(GPIO_TABLE[aIndex].mSDA);
-    GPIO_InitFunction(GPIO_TABLE[aIndex].mSCL);
+    GPIO_InitFunction(GPIO_TABLE[aIndex].mSDA, FUNCTION_TABLE[aIndex]);
+    GPIO_InitFunction(GPIO_TABLE[aIndex].mSCL, FUNCTION_TABLE[aIndex]);
 
     *SIM_PCE1 |= SIM_PCE1_BITS[aIndex];
 

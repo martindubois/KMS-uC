@@ -14,12 +14,12 @@ typedef struct
 {
     uint16_t mBit               : 4;
     uint16_t mDrive             : 1;
-    uint16_t mFunction          : 2;
+    uint16_t mReserved0         : 2;
     uint16_t mInterrupt_Falling : 1;
 
     uint16_t mOutput        : 1;
     uint16_t mPort          : 3;
-    uint16_t mPullUp_Enable : 1;
+    uint16_t mPull_Enable   : 1;
     uint16_t mPullUp_Select : 1;
     uint16_t mPushPull      : 1;
     uint16_t mSlewRate_Slow : 1;
@@ -41,7 +41,7 @@ GPIO;
 
 extern void GPIO_Init(GPIO aDesc);
 
-extern void GPIO_InitFunction(GPIO aDesc);
+extern void GPIO_InitFunction(GPIO aDesc, uint16_t aFunction);
 
 // Retrieve the register address and mask, normaly to be passed to
 // Debounced_Init.

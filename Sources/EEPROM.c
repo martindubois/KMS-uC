@@ -114,6 +114,9 @@ void EEPROM_Init(EEPROM* aThis, uint8_t aBusIndex, uint8_t aDeviceAddress, GPIO 
 
     aThis->mWriteProtect = aWriteProtect;
 
+    aThis->mWriteProtect.mOutput        = 1;
+    aThis->mWriteProtect.mSlewRate_Slow = 1;
+
     GPIO_Init(aThis->mWriteProtect);
 }
 

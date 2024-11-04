@@ -107,7 +107,7 @@ void GPIO_Init(GPIO aDesc)
     }
 }
 
-void GPIO_InitFunction(GPIO aDesc)
+void GPIO_InitFunction(GPIO aDesc, uint16_t aFunction)
 {
     // assert(BIT_PER_PORT > aDesc.mBit);
 
@@ -140,7 +140,7 @@ void GPIO_InitFunction(GPIO aDesc)
         if (NULL != lGPS)
         {
             *lGPS &= ~ (0x3 << lS2);
-            *lGPS |= aDesc.mFunction << lS2;
+            *lGPS |= aFunction << lS2;
         }
 
         Init(aDesc);
@@ -277,7 +277,7 @@ void Init(GPIO aDesc)
 
     if (aDesc.mDrive            ) { lR->mDrive             |= lB; } else { lR->mDrive             &= lM; }
     if (aDesc.mInterrupt_Falling) { lR->mInterrupt_Falling |= lB; } else { lR->mInterrupt_Falling &= lM; }
-    if (aDesc.mPullUp_Enable    ) { lR->mPullUp_Enable     |= lB; } else { lR->mPullUp_Enable     &= lM; }
+    if (aDesc.mPull_Enable      ) { lR->mPullUp_Enable     |= lB; } else { lR->mPullUp_Enable     &= lM; }
     if (aDesc.mPullUp_Select    ) { lR->mPullUp_Select     |= lB; } else { lR->mPullUp_Select     &= lM; }
     if (aDesc.mPushPull         ) { lR->mPushPull          |= lB; } else { lR->mPushPull          &= lM; }
     if (aDesc.mSlewRate_Slow    ) { lR->mSlewRate_Slow     |= lB; } else { lR->mSlewRate_Slow     &= lM; }

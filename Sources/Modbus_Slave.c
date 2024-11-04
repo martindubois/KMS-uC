@@ -126,6 +126,9 @@ void Modbus_Slave_Init(uint8_t aUART, uint8_t aDevice, Modbus_Slave_Range* aRang
     sState        = STATE_INIT;
     sUART         = aUART;
 
+    sOutputEnable.mOutput        = 1;
+    sOutputEnable.mSlewRate_Slow = 1;
+
     UART_Init(sUART);
 
     GPIO_Output(sOutputEnable, 0);

@@ -55,8 +55,16 @@ Modbus_Slave_Range;
 // aDevice        The Modbus device address
 // aRanges        The register ranges
 // aRangeQty      The number of ranges
-// aOutputEnable  A GPIO to set to 1 when transmiting. Use a GPIO in
-//                GPIO_PORT_DUMMY if no such ouput is needed.
+// aOutputEnable  This GPIO to set to 1 when transmiting.
+//                    .mBit
+//                    .mDrive
+//                    .mInterrupt_Falling
+//                    .mOutput            : Ignored, must be an output
+//                    .mPort              : See GPIO_PORT_...
+//                    .mPull_Enable
+//                    .mPullUp_Select
+//                    .mPushPull
+//                    .mSlewRate_Slow     : Ignored, must be set
 extern void Modbus_Slave_Init(uint8_t aUART, uint8_t aDevice, Modbus_Slave_Range* aRanges, uint8_t aRangeQty, GPIO aOutputEnable);
 
 // Return  MODBUS_NO_ERROR

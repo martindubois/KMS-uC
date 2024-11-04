@@ -7,10 +7,13 @@
 
 // ==== C ===================================================================
 #include <stdint.h>
+#include <stdlib.h>
 
 // ==== Includes ============================================================
 #include "ADC.h"
+#include "Expander.h"
 #include "GPIO.h"
+#include "I2C.h"
 #include "Modbus_Slave.h"
 #include "PWM.h"
 #include "Tick.h"
@@ -23,6 +26,11 @@
 
 #define _BOARD_NK_E1_CTRL_
 // #define _BOARD_UNKNOWN_
+
+// #define _TEST_ADC12_
+// #define _TEST_MODBUS_SLAVE_
+// #define _TEST_PWMA_
+#define _TEST_EXPANDER_
 
 // Variables
 // //////////////////////////////////////////////////////////////////////////
@@ -40,6 +48,11 @@ static uint8_t ADC_CHANNELS[] =
 
 static GPIO ANALOG_0;
 static GPIO ANALOG_14;
+
+static GPIO EXPANDER_INT;
+static GPIO EXPANDER_RESET;
+
+static uint8_t EXPANDER_DEFAULT_INPUT[2] = { 0x00, 0x00 };
 
 static GPIO MODBUS_OUTPUT_ENABLE;
 static GPIO MODBUS_RX;
@@ -75,17 +88,22 @@ void Test_Init0()
     ANALOG_14.mBit  = 6;
     ANALOG_14.mPort = GPIO_PORT_B;
 
-    MODBUS_OUTPUT_ENABLE.mBit           = 9;
-    MODBUS_OUTPUT_ENABLE.mOutput        = 1;
-    MODBUS_OUTPUT_ENABLE.mPushPull      = 1;
-    MODBUS_OUTPUT_ENABLE.mSlewRate_Slow = 1;
+    EXPANDER_INT.mBit           = 10;
+    EXPANDER_INT.mPull_Enable   = 1;
+    EXPANDER_INT.mPullUp_Select = 1;
 
-    MODBUS_RX.mBit      = 8;
-    MODBUS_RX.mPort     = GPIO_PORT_C;
-    MODBUS_RX.mFunction = 1;
+    EXPANDER_RESET.mBit      = 8;
+    EXPANDER_RESET.mDrive    = 1;
+    EXPANDER_RESET.mPushPull = 1;
+
+    MODBUS_OUTPUT_ENABLE.mBit      = 9;
+    MODBUS_OUTPUT_ENABLE.mPort     = GPIO_PORT_A;
+    MODBUS_OUTPUT_ENABLE.mPushPull = 1;
+
+    MODBUS_RX.mBit  = 8;
+    MODBUS_RX.mPort = GPIO_PORT_C;
 
     MODBUS_TX.mBit           = 7;
-    MODBUS_TX.mFunction      = 1;
     MODBUS_TX.mOutput        = 1;
     MODBUS_TX.mSlewRate_Slow = 1;
 
@@ -98,53 +116,93 @@ void Test_Init0()
     PWMA_1_A.mPort = GPIO_PORT_E;
 
     #ifdef _BOARD_NK_E1_CTRL_
+        EXPANDER_INT        .mPort = GPIO_PORT_C;
+        EXPANDER_RESET      .mPort = GPIO_PORT_F;
         MODBUS_OUTPUT_ENABLE.mPort = GPIO_PORT_C;
         MODBUS_TX           .mPort = GPIO_PORT_C;
         PWMA_0_A            .mPort = GPIO_PORT_E;
     #endif
 
     #ifdef _BOARD_UNKNOWN_
+        EXPANDER_INT        .mPort = GPIO_PORT_DUMMY;
+        EXPANDER_RESET      .mPort = GPIO_PORT_DUMMY;
         MODBUS_OUTPUT_ENABLE.mPort = GPIO_PORT_DUMMY;
         MODBUS_TX           .mPort = GPIO_PORT_DUMMY;
         PWMA_0_A            .mPort = GPIO_PORT_DUMMY;
     #endif
+
+    I2Cs_Init0();
 }
 
 void Test_Main()
 {
-    GPIO_InitFunction(ANALOG_0);
-    GPIO_InitFunction(MODBUS_RX);
-    GPIO_InitFunction(MODBUS_TX);
-    GPIO_InitFunction(PWMA_0_A);
-    GPIO_InitFunction(PWMA_1_A);
-    
-    ADC_Init(ADC_CHANNELS, sizeof(ADC_CHANNELS) / sizeof(ADC_CHANNELS[0]), ADC_INTERRUPT_END_OF_SCAN);
+    #ifdef _TEST_ADC12_
 
-    Modbus_Slave_Init(0, 0x01, MODBUS_RANGES, sizeof(MODBUS_RANGES) / sizeof(MODBUS_RANGES[0]), MODBUS_OUTPUT_ENABLE);
+        GPIO_InitFunction(ANALOG_0 , 0);
+        GPIO_InitFunction(ANALOG_14, 0);
 
-    PWM_Init(0, PWM_MODE_OUTPUT);
-    PWM_Init(1, PWM_MODE_CAPTURE_PERIOD);
+        ADC_Init(ADC_CHANNELS, sizeof(ADC_CHANNELS) / sizeof(ADC_CHANNELS[0]), ADC_INTERRUPT_END_OF_SCAN);
+
+    #endif
+
+    #ifdef _TEST_EXPANDER_
+
+        Expander_Init(1, 0x40, EXPANDER_RESET, EXPANDER_DEFAULT_INPUT, EXPANDER_INT, NULL);
+
+        I2C_Init(1);
+
+    #endif
+
+    #ifdef _TEST_MODBUS_SLAVE_
+
+        GPIO_InitFunction(MODBUS_RX, 1);
+        GPIO_InitFunction(MODBUS_TX, 1);
+
+        Modbus_Slave_Init(0, 0x01, MODBUS_RANGES, sizeof(MODBUS_RANGES) / sizeof(MODBUS_RANGES[0]), MODBUS_OUTPUT_ENABLE);
+
+    #endif
+
+    #ifdef _TEST_PWMA_
+
+        GPIO_InitFunction(PWMA_0_A , 0);
+        GPIO_InitFunction(PWMA_1_A , 0);
+
+        PWM_Init(0, PWM_MODE_OUTPUT);
+        PWM_Init(1, PWM_MODE_CAPTURE_PERIOD);
+
+        PWM_Start(0);
+        PWM_Start(1);
+
+        PWM_Set(0, 0, 300);
+
+        PWM_Set2(0, 250, 500);
+
+    #endif
 
     Tick_Init(80000000);
-
-    PWM_Start(0);
-    PWM_Start(1);
-
-    PWM_Set(0, 0, 300);
-
-    PWM_Set2(0, 250, 500);
 
     for (;;)
     {
         uint16_t lPeriod_ms;
 
-        Modbus_Slave_Work();
+        #ifdef _TEST_MODBUS_SLAVE_
+            Modbus_Slave_Work();
+        #endif
 
         lPeriod_ms = Tick_Work();
         if (0 < lPeriod_ms)
         {
-            Modbus_Slave_Tick(lPeriod_ms);
-            PWM_Tick(1, lPeriod_ms);
+            #ifdef _TEST_EXPANDER_
+                Expander_Tick(lPeriod_ms);
+            #endif
+
+            #ifdef _TEST_MODBUS_SLAVE_
+                Modbus_Slave_Tick(lPeriod_ms);
+            #endif
+
+            #ifdef _TEST_PWMA_
+                PWM_Tick(1, lPeriod_ms);
+            #endif
         }
     }
 }

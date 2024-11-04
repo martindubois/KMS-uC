@@ -34,6 +34,7 @@
 // ===== C ==================================================================
 #include <stdint.h>
 #include <stdlib.h>
+#include <string.h>
 
 // ===== Includes ===========================================================
 #include "I2C.h"
@@ -44,29 +45,28 @@
 // Data types
 // //////////////////////////////////////////////////////////////////////////
 
-// --> UNINITIALIZED
-//     |
-//     +--> IDLE <==+--------------------+
-//          |       |                    |
-//          +--> I2C_NEEDED <------------|-----------+
-//               | | | |                 |           |
-//               | | | +--> CONFIG       |           |
-//               | | |      |            |           |
-//               | | +------|--> INPUT   |           |
-//               | |        |    |  |    |           |
-//               | +--------|----|--+==> I2C_PENDING |
-//               |          |    |       |           |
-//               +----------+====+=======+=====> ERROR
+// --> I2C_NEEDED <=========================+------------+
+//     | | | | |                            |            |
+//     | | | | +--> CONFIG                  |            |
+//     | | | |      |  |                    |            |
+//     | | | +------|--|--> INPUT           |            |
+//     | | |        |  |    |  |            |            |
+//     | | +--------|--|----|--|--> VERIFY  |            |
+//     | |          |  |    |  |    |  |    |            |
+//     | +----------|--+====|==+====|==+==> I2C_PENDING  |
+//     |            |       |       |       |            |
+//     +------------+=======+=======+=======+==> RESET --+
 typedef enum
 {
-    STATE_UNINITIALIZED = 0,
+    STATE_I2C_NEEDED = 0,
     
     STATE_CONFIG,
-    STATE_ERROR,
-    STATE_I2C_NEEDED,
     STATE_I2C_PENDING,
-    STATE_IDLE,
     STATE_INPUT,
+    STATE_RESET,
+    STATE_VERIFY,
+
+    STATE_QTY
 }
 State;
 
@@ -87,9 +87,7 @@ ConfigOp;
 
 #define PORT_QTY (2)
 
-#define TIMEOUT_DISABLED (0)
-
-#define TIMEOUT_ms (500)
+#define VERIFY_AGE_MAX_ms (1000)
 
 // Variables
 // //////////////////////////////////////////////////////////////////////////
@@ -105,19 +103,22 @@ static uint8_t sConfigIndex;
 
 static I2C_Device sDevice;
 
-static uint8_t sFlags_Running;
+static uint8_t sInput        [PORT_QTY];
+static uint8_t sInput_Default[PORT_QTY];
+static uint8_t sOutput       [PORT_QTY];
+static uint8_t sVerify       [PORT_QTY];
 
-static uint8_t sInput [PORT_QTY];
-static uint8_t sOutput[PORT_QTY];
+static uint16_t sVerifyAge_ms;
 
 static GPIO sInt;
+static GPIO sReset;
 
 static Expander_Callback sOnInputChanged;
 static Expander_Callback sOnOperationCompleted;
 
-static State sState = STATE_UNINITIALIZED;
+static State sState = STATE_I2C_NEEDED;
 
-static unsigned int sTimeout_ms;
+static uint16_t sStats[STATE_QTY];
 
 static const ConfigOp CONFIG_OPS[] =
 {
@@ -141,12 +142,27 @@ static uint8_t sFlags_Waiting;
 // Static function declarations
 // //////////////////////////////////////////////////////////////////////////
 
-static void SetState_ERROR();
+static void AddFlags(uint8_t aFlags);
+
+static void CopyDefaultInput();
+
+static void OnConfigCompleted();
+static void OnVerifyChanged();
+
+static void SetState(State aState);
+
+static void SetState_CONFIG     ();
+static void SetState_I2C_PENDING(Expander_Callback aOnCompletion);
+static void SetState_INPUT      ();
+static void SetState_RESET      ();
+static void SetState_VERIFY     ();
 
 static void Tick_CONFIG     (uint16_t aPeriod_ms);
 static void Tick_I2C_NEEDED ();
 static void Tick_I2C_PENDING(uint16_t aPeriod_ms);
 static void Tick_INPUT      (uint16_t aPeriod_ms);
+static void Tick_RESET      ();
+static void Tick_VERIFY     (uint16_t aPeriod_ms);
 
 static void WriteConfig();
 
@@ -161,194 +177,287 @@ void Expander_Interrupt()
     GPIO_Interrupt_Acknowledge(sInt);
 
     sFlags_Waiting |= FLAG_INPUT;
+
+    // TODO  We know the expander did not reset, because interruption are
+    //       masked at reset. We could reset the verification timer here.
+    //       But if noise can generate interrupt, we don't want to reset the
+    //       verification timer here.
 }
 
 // Functions
 // //////////////////////////////////////////////////////////////////////////
 
-void Expander_Init(uint8_t aI2C, uint8_t aDevice, GPIO aInt, Expander_Callback aOnInputChanged)
+void Expander_Init(uint8_t aI2C, uint8_t aDevice, GPIO aReset, const uint8_t* aDefaultInput, GPIO aInt, Expander_Callback aOnInputChanged)
 {
     // assert(0x40 == (aDevice & 0xfc);
+    // assert(NULL != aDefaultInput);
 
     I2C_Device_Init(&sDevice, aI2C, aDevice);
 
     sInt            = aInt;
     sOnInputChanged = aOnInputChanged;
-    sState          = STATE_IDLE;
+    sReset          = aReset;
+
+    sInt.mInterrupt_Falling = 1;
+    sInt.mOutput            = 0;
+
+    sReset.mOutput        = 1;
+    sReset.mSlewRate_Slow = 1;
+
+    memcpy(&sInput_Default, aDefaultInput, sizeof(sInput_Default));
+
+    CopyDefaultInput();
 
     GPIO_Init(sInt);
+    GPIO_Init(sReset);
 
     GPIO_Interrupt_Enable(sInt);
+
+    GPIO_Output(sReset, 0);
+    GPIO_Output(sReset, 1);
 }
 
 void Expander_GPIO_Init(GPIO aDesc)
 {
-    uint8_t  lB;
-    uint8_t  lB2;
-    uint8_t  lM;
-    uint8_t  lM2;
-    uint16_t lP;
-    uint16_t lP2;
-
-    // assert(8        > aDesc.mBit);
-    // assert(PORT_QTY > aDesc.mPort);
-
-    lB  = 1 << aDesc.mBit;
-    lB2 = 3 << (aDesc.mBit % 4 * 2);
-    lM  = (uint8_t)(~ lB);
-    lM2 = (uint8_t)(~ lB2);
-    lP  = aDesc.mPort;
-    lP2 = aDesc.mBit / 4;
-
-    if (aDesc.mDrive) { sConfig_DriveStrength[lP][lP2] |= lB2; } else { sConfig_DriveStrength[lP][lP2] &= lM2; }
-
-    if (aDesc.mPullUp_Enable) { sConfig_PullEnable[lP] |= lB ; } else { sConfig_PullEnable[lP] &= lM ; }
-    if (aDesc.mPullUp_Select) { sConfig_PullSelect[lP] |= lB ; } else { sConfig_PullSelect[lP] &= lM ; }
-
-    if (aDesc.mOutput)
+    if (GPIO_PORT_DUMMY > aDesc.mPort)
     {
-        if (aDesc.mPushPull) { sConfig_OutputPortConfig &= ~ (1 << lP); } else { sConfig_OutputPortConfig |= 1 << lP; }
+        // assert(       8 > aDesc.mBit);
+        // assert(PORT_QTY > aDesc.mPort);
 
-        sConfig_Configuration[lP] &= lM;
-    }
-    else
-    {
-        sConfig_Configuration[lP] |= lB;
-    }
+        uint8_t  lB;
+        uint8_t  lB2;
+        uint8_t  lM;
+        uint8_t  lM2;
+        uint16_t lP;
+        uint16_t lP2;
 
-    GPIO_Interrupt_Disable(sInt);
-    {
-        sFlags_Waiting |= FLAG_CONFIG;
+        lB  = 1 << aDesc.mBit;
+        lB2 = 3 << (aDesc.mBit % 4 * 2);
+        lM  = (uint8_t)(~ lB);
+        lM2 = (uint8_t)(~ lB2);
+        lP  = aDesc.mPort;
+        lP2 = aDesc.mBit / 4;
+
+        if (aDesc.mDrive) { sConfig_DriveStrength[lP][lP2] |= lB2; } else { sConfig_DriveStrength[lP][lP2] &= lM2; }
+
+        if (aDesc.mPull_Enable  ) { sConfig_PullEnable[lP] |= lB ; } else { sConfig_PullEnable[lP] &= lM ; }
+        if (aDesc.mPullUp_Select) { sConfig_PullSelect[lP] |= lB ; } else { sConfig_PullSelect[lP] &= lM ; }
+
+        if (aDesc.mOutput)
+        {
+            if (aDesc.mPushPull) { sConfig_OutputPortConfig &= ~ (1 << lP); } else { sConfig_OutputPortConfig |= 1 << lP; }
+
+            sConfig_Configuration[lP] &= lM;
+        }
+        else
+        {
+            sConfig_Configuration[lP] |= lB;
+        }
+
+        AddFlags(FLAG_CONFIG);
     }
-    GPIO_Interrupt_Enable(sInt);
 }
 
 uint8_t Expander_GPIO_Input(GPIO aDesc)
 {
-    uint8_t  lB;
-    uint16_t lP;
+    uint8_t lResult = 0;
 
-    // assert(8        > aDesc.mBit);
-    // assert(PORT_QTY > aDesc.mPort);
+    if (GPIO_PORT_DUMMY > aDesc.mPort)
+    {
+        // assert(8        > aDesc.mBit);
+        // assert(PORT_QTY > aDesc.mPort);
 
-    lB = 1 << aDesc.mBit;
-    lP = aDesc.mPort;
+        uint8_t  lB;
+        uint16_t lP;
 
-    return 0 != (sInput[lP] & lB);
+        lB = 1 << aDesc.mBit;
+        lP = aDesc.mPort;
+
+        lResult = (0 != (sInput[lP] & lB));
+    }
+
+    return lResult;
 }
 
 void Expander_GPIO_Output(GPIO aDesc, uint8_t aValue)
 {
-    uint8_t  lB;
-    uint8_t  lM;
-    uint16_t lP;
-
-    // assert(8        > aDesc.mBit);
-    // assert(PORT_QTY > aDesc.mPort);
-
-    lB = 1 << aDesc.mBit;
-    lM = (uint8_t)(~ lB);
-    lP = aDesc.mPort;
-
-    if (aValue)
+    if (GPIO_PORT_DUMMY > aDesc.mPort)
     {
-        sOutput[lP] |= lB;
-    }
-    else
-    {
-        sOutput[lP] &= lM;
-    }
+        // assert(8        > aDesc.mBit);
+        // assert(PORT_QTY > aDesc.mPort);
 
-    GPIO_Interrupt_Disable(sInt);
-    {
-        sFlags_Waiting |= FLAG_OUTPUT;
+        uint8_t  lB;
+        uint8_t  lBefore;
+        uint8_t  lM;
+        uint16_t lP;
+
+        lB = 1 << aDesc.mBit;
+        lM = (uint8_t)(~ lB);
+        lP = aDesc.mPort;
+
+        lBefore = sOutput[lP];
+
+        if (aValue)
+        {
+            sOutput[lP] |= lB;
+        }
+        else
+        {
+            sOutput[lP] &= lM;
+        }
+
+        if (lBefore != sOutput[lP])
+        {
+            AddFlags(FLAG_OUTPUT);
+        }
     }
-    GPIO_Interrupt_Enable(sInt);
 }
 
 uint8_t Expander_GPIO_Output_Get(GPIO aDesc)
 {
-    uint8_t  lB;
-    uint16_t lP;
+    uint8_t lResult = 0;
 
-    // assert(8        > aDesc.mBit);
-    // assert(PORT_QTY > aDesc.mPort);
+    if (GPIO_PORT_DUMMY > aDesc.mPort)
+    {
+        // assert(8        > aDesc.mBit);
+        // assert(PORT_QTY > aDesc.mPort);
 
-    lB = 1 << aDesc.mBit;
-    lP = aDesc.mPort;
+        uint8_t  lB;
+        uint16_t lP;
 
-    return 0 != (sOutput[lP] & lB);
+        lB = 1 << aDesc.mBit;
+        lP = aDesc.mPort;
+
+        lResult = (0 != (sOutput[lP] & lB));
+    }
+
+    return lResult;
 }
 
 void Expander_Tick(uint16_t aPeriod_ms)
 {
     // assert(0 < aPeriod_ms);
 
-    // assert(TIMEOUT_ms >= sTimeout_ms);
-    
-    if (TIMEOUT_DISABLED < sTimeout_ms)
-    {
-        if (sTimeout_ms > aPeriod_ms)
-        {
-            sTimeout_ms -= aPeriod_ms;
-        }
-        else
-        {
-            SetState_ERROR();
-        }
-    }
+    sVerifyAge_ms += aPeriod_ms;
 
     switch (sState)
     {
-    case STATE_ERROR:
-    case STATE_IDLE:
-        if (0 != sFlags_Waiting)
-        {
-            sTimeout_ms = TIMEOUT_ms;
-            sState = STATE_I2C_NEEDED;
-            Tick_I2C_NEEDED();
-        }
-        break;
-
     case STATE_CONFIG     : Tick_CONFIG     (aPeriod_ms); break;
     case STATE_I2C_PENDING: Tick_I2C_PENDING(aPeriod_ms); break;
     case STATE_INPUT      : Tick_INPUT      (aPeriod_ms); break;
+    case STATE_VERIFY     : Tick_VERIFY     (aPeriod_ms); break;
 
     case STATE_I2C_NEEDED: Tick_I2C_NEEDED(); break;
+    case STATE_RESET     : Tick_RESET     (); break;
 
-    case STATE_UNINITIALIZED: break;
+    // default: assert(false);
     }
 }
 
 // Static functions
 // //////////////////////////////////////////////////////////////////////////
 
-void SetState_ERROR()
+void AddFlags(uint8_t aFlags)
 {
-    // assert(TIMEOUT_ms >= sTimeout_ms);
+    // assert(0 != aFlags);
 
     GPIO_Interrupt_Disable(sInt);
     {
-        // Retry any running operation at next Tick
-        sFlags_Waiting |= sFlags_Running;
+        sFlags_Waiting |= aFlags;
     }
     GPIO_Interrupt_Enable(sInt);
+}
 
-    sFlags_Running = 0;
-    sState         = STATE_ERROR;
-    sTimeout_ms    = TIMEOUT_DISABLED;
+void CopyDefaultInput()
+{
+    memcpy(&sInput, &sInput_Default, sizeof(sInput));
+}
+
+void OnConfigCompleted()
+{
+    // We just completed the configuration, we need to read input and update
+    // output.
+    AddFlags(FLAG_INPUT | FLAG_OUTPUT);
+}
+
+void OnVerifyChanged()
+{
+    unsigned int i;
+
+    for (i = 0; i < PORT_QTY; i++)
+    {
+        if (sConfig_InterruptMask[i] != sVerify[i])
+        {
+            SetState_RESET();
+            break;
+        }
+    }
+}
+
+void SetState(State aState)
+{
+    // assert(STATE_QTY > aState);
+
+    sState = aState;
+
+    sStats[sState]++;
+}
+
+void SetState_CONFIG()
+{
+    sConfigIndex = 0;
+    WriteConfig();
+
+    SetState(STATE_CONFIG);
+}
+
+void SetState_I2C_PENDING(Expander_Callback aOnCompletion)
+{
+    sOnOperationCompleted = aOnCompletion;
+
+    SetState(STATE_I2C_PENDING);
+}
+
+void SetState_INPUT()
+{
+    I2C_Device_Write(sDevice, 0x00, NULL, 0);
+
+    SetState(STATE_INPUT);
+}
+
+void SetState_RESET()
+{
+    GPIO_Output(sReset, 0);
+
+    SetState(STATE_RESET);
+
+    CopyDefaultInput();
+
+    if (NULL != sOnInputChanged)
+    {
+        sOnInputChanged();
+    }
+}
+
+void SetState_VERIFY()
+{
+    // assert(0 < sVerifyAge_ms);
+
+    I2C_Device_Write(sDevice, 0x4a, NULL, 0);
+
+    SetState(STATE_VERIFY);
+
+    sVerifyAge_ms = 0;
 }
 
 void Tick_CONFIG(uint16_t aPeriod_ms)
 {
     // assert(0 < aPeriod_ms)
 
-    // assert(STATE_CONFIG == sState);
-
     I2C_Device_Tick(sDevice, aPeriod_ms);
     switch (I2C_Device_Status(sDevice))
     {
-    case I2C_ERROR: SetState_ERROR(); break;
+    case I2C_ERROR: SetState_RESET(); break;
 
     case I2C_PENDING: break;
 
@@ -357,15 +466,7 @@ void Tick_CONFIG(uint16_t aPeriod_ms)
 
         if (CONFIG_OP_QTY <= sConfigIndex)
         {
-            // We just changed the configuration, we maybe need to read input
-            // status.
-            GPIO_Interrupt_Disable(sInt);
-            {
-                sFlags_Waiting |= FLAG_INPUT;
-            }
-            GPIO_Interrupt_Enable(sInt);
-
-            sState = STATE_I2C_PENDING;
+            SetState_I2C_PENDING(OnConfigCompleted);
         }
         break;
 
@@ -375,44 +476,59 @@ void Tick_CONFIG(uint16_t aPeriod_ms)
 
 void Tick_I2C_NEEDED()
 {
-    // assert(STATE_I2C_PENDING == sState);
-    // assert(0 < sTimeout_ms);
-    // assert(TIMEOUT_ms >= sTimeout_ms);
-
     if (I2C_Device_Idle(sDevice))
     {
-        sTimeout_ms = 0;
-
-        if (0 != (sFlags_Waiting & FLAG_CONFIG))
+        if ((0 == sFlags_Waiting) || (VERIFY_AGE_MAX_ms <= sVerifyAge_ms))
         {
-            sFlags_Running = FLAG_CONFIG;
-            sConfigIndex = 0;
-            WriteConfig();
-            sState = STATE_CONFIG;
-        }
-        else if (0 != (sFlags_Waiting & FLAG_OUTPUT))
-        {
-            sFlags_Running = FLAG_OUTPUT;
-            I2C_Device_Write(sDevice, 0x02, sOutput, sizeof(sOutput));
-            sState = STATE_I2C_PENDING;
-        }
-        else if (0 != (sFlags_Waiting & FLAG_INPUT))
-        {
-            sFlags_Running = FLAG_INPUT;
-            I2C_Device_Write(sDevice, 0x00, NULL, 0);
-            sState = STATE_INPUT;
+            SetState_VERIFY();
         }
         else
         {
-            sFlags_Running = 0;
-            sState = STATE_IDLE;
-        }
+            uint8_t lFlags_Running = 0;
 
-        GPIO_Interrupt_Disable(sInt);
-        {
-            sFlags_Waiting &= ~ sFlags_Running;
+            if (0 != (sFlags_Waiting & FLAG_CONFIG))
+            {
+                lFlags_Running = FLAG_CONFIG;
+                SetState_CONFIG();
+            }
+            else
+            {
+                static uint8_t sToggle;
+
+                if (sToggle)
+                {
+                    if (0 != (sFlags_Waiting & FLAG_INPUT))
+                    {
+                        lFlags_Running = FLAG_INPUT;
+                        SetState_INPUT();
+                    }
+
+                    sToggle = 0;
+                }
+                else
+                {
+                    if (0 != (sFlags_Waiting & FLAG_OUTPUT))
+                    {
+                        lFlags_Running = FLAG_OUTPUT;
+
+                        I2C_Device_Write(sDevice, 0x02, sOutput, sizeof(sOutput));
+
+                        SetState_I2C_PENDING(NULL);
+                    }
+
+                    sToggle = 1;
+                }
+            }
+
+            if (0 != lFlags_Running)
+            {
+                GPIO_Interrupt_Disable(sInt);
+                {
+                    sFlags_Waiting &= ~ lFlags_Running;
+                }
+                GPIO_Interrupt_Enable(sInt);
+            }
         }
-        GPIO_Interrupt_Enable(sInt);
     }
 }
 
@@ -420,19 +536,15 @@ void Tick_I2C_PENDING(uint16_t aPeriod_ms)
 {
     // assert(0 < aPeriod_ms)
 
-    // assert(0 != sFlags_Running);
-    // assert(STATE_I2C_PENDING == sState);
-
     I2C_Device_Tick(sDevice, aPeriod_ms);
     switch (I2C_Device_Status(sDevice))
     {
-    case I2C_ERROR: SetState_ERROR(); break;
+    case I2C_ERROR: SetState_RESET(); break;
 
     case I2C_PENDING: break;
 
     case I2C_SUCCESS:
-        sFlags_Running = 0;
-        sState = STATE_IDLE;
+        SetState(STATE_I2C_NEEDED);
 
         if (NULL != sOnOperationCompleted)
         {
@@ -449,19 +561,47 @@ void Tick_INPUT(uint16_t aPeriod_ms)
 {
     // assert(0 < aPeriod_ms)
 
-    // assert(STATE_INPUT == sState);
-
     I2C_Device_Tick(sDevice, aPeriod_ms);
     switch (I2C_Device_Status(sDevice))
     {
-    case I2C_ERROR: SetState_ERROR(); break;
+    case I2C_ERROR: SetState_RESET(); break;
 
     case I2C_PENDING: break;
 
     case I2C_SUCCESS:
         I2C_Device_Read(sDevice, sInput, sizeof(sInput));
-        sOnOperationCompleted = sOnInputChanged;
-        sState = STATE_I2C_PENDING;
+
+        SetState_I2C_PENDING(sOnInputChanged);
+        break;
+
+    // default: assert(false);
+    }
+}
+
+void Tick_RESET()
+{
+    GPIO_Output(sReset, 1);
+
+    SetState(STATE_I2C_NEEDED);
+
+    AddFlags(FLAG_CONFIG);
+}
+
+void Tick_VERIFY(uint16_t aPeriod_ms)
+{
+    // assert(0 < aPeriod_ms);
+
+    I2C_Device_Tick(sDevice, aPeriod_ms);
+    switch (I2C_Device_Status(sDevice))
+    {
+    case I2C_ERROR: SetState_RESET(); break;
+
+    case I2C_PENDING: break;
+
+    case I2C_SUCCESS:
+        I2C_Device_Read(sDevice, sVerify, sizeof(sVerify));
+
+        SetState_I2C_PENDING(OnVerifyChanged);
         break;
 
     // default: assert(false);
