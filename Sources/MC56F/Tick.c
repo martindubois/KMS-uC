@@ -57,6 +57,11 @@ static volatile PIT_Regs* PIT1_REGS = (PIT_Regs*)0x0000E110;
 
 #define SIM_PCE2_PIT1 (0x0004)
 
+// Variables
+// //////////////////////////////////////////////////////////////////////////
+
+static uint16_t sStats;
+
 // Functions
 // //////////////////////////////////////////////////////////////////////////
 
@@ -95,6 +100,8 @@ uint16_t Tick_Work()
         lControl &= ~ PIT_CTRL_PRF;
 
         PIT1_REGS->mControl = lControl;
+
+        sStats++;
     }
 
     return lResult_ms;
