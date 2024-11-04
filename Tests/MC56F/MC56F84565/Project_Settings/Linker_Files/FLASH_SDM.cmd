@@ -10,7 +10,7 @@
 ##
 ##     Compiler  : CodeWarrior DSP C Compiler
 ##
-##     Date/Time : 2024-09-25, 13:21, # CodeGen: 0
+##     Date/Time : 2024-11-04, 14:48, # CodeGen: 14
 ##
 ##     Abstract  :
 ##
@@ -172,7 +172,7 @@ SECTIONS {
               . = _HEAP_END;
 
               /* SETUP the STACK address */
-              _min_stack_size = 0x00000200;
+              _min_stack_size = 0x00000400;
               _stack_addr = _HEAP_END;
               _stack_end  = _stack_addr + _min_stack_size;
               . = _stack_end;
