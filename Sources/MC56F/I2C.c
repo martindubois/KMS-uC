@@ -219,6 +219,7 @@ void I2C_Init(uint8_t aIndex)
 uint8_t I2C_Idle(uint8_t aIndex)
 {
     // assert(I2C_QTY > aIndex);
+
     // assert(STATE_QTY > sContexts[aIndex].mState);
 
     return STATE_IDLE == sContexts[aIndex].mState;
@@ -254,6 +255,7 @@ uint8_t I2C_Status(uint8_t aIndex)
     return lResult;
 }
 
+// KNOWN LIMITATION  aOutSize_byte must be at least 2.
 void I2C_Read(uint8_t aIndex, uint8_t aDevice, void* aOut, uint8_t aOutSize_byte)
 {
     // assert(I2C_QTY > aIndex);
@@ -405,14 +407,16 @@ void Interrupt_Enable(Context* aThis)
 void Interrupt_RX_DATA(Context* aThis)
 {
     // assert(NULL != aThis->mDataPtr);
-    // assert(0 < aThis->mDataSize_byte);
     // assert(I2C_QTY > aThis->mIndex);
 
     volatile PortRegs* lR = PORT_REGS + aThis->mIndex;
 
-    if (1 >= aThis->mDataSize_byte)
+    switch (aThis->mDataSize_byte)
     {
-        lR->mControl1 |= C1_TXAK;
+    case 2: lR->mControl1 |=   C1_TXAK; break; // Only 1 byte left, disable the acknowlege
+    case 1: lR->mControl1 &= ~ C1_MST ; break; // No byte left, stop
+
+    // case 0: assert(false);
     }
 
     *aThis->mDataPtr = (uint8_t)lR->mData;
@@ -442,11 +446,11 @@ void Interrupt_TX_DATA(Context* aThis, uint16_t aStatus)
 
     if (0 == (aStatus & S_RXAK))
     {
+        volatile PortRegs* lR = PORT_REGS + aThis->mIndex;
+
         if (0 < aThis->mDataSize_byte)
         {
             // assert(NULL != aThis->mDataPtr);
-
-            volatile PortRegs* lR = PORT_REGS + aThis->mIndex;
 
             lR->mData = (uint16_t)*aThis->mDataPtr;
 
@@ -455,6 +459,9 @@ void Interrupt_TX_DATA(Context* aThis, uint16_t aStatus)
         }
         else
         {
+            lR->mControl1 &= ~ C1_TX;
+            lR->mControl1 &= ~ C1_MST;
+
             SetState_COMPLETED(aThis);
         }
     }
@@ -483,6 +490,7 @@ void Interrupt_TX_DEVICE(Context* aThis, uint16_t aStatus)
         {
             uint16_t lDummy;
         
+            // TODO  Support read of single byte
             lR->mControl1 &= ~ C1_TX;
             lR->mControl1 &= ~ C1_TXAK;
 
@@ -499,14 +507,8 @@ void Interrupt_TX_DEVICE(Context* aThis, uint16_t aStatus)
 
 void SetState_COMPLETED(Context* aThis)
 {
-    // assert(I2C_QTY > aThis->mIndex);
     // assert((STATE_RX_DATA == aThis->mState) || (STATE_TX_DATA == aThis->mState));
     // assert(0 < aThis->mTimeout_ms);
-
-    volatile PortRegs* lR = PORT_REGS + aThis->mIndex;
-
-    lR->mControl1 &= ~ C1_TX;
-    lR->mControl1 &= ~ C1_MST;
 
     aThis->mState = STATE_COMPLETED;
     aThis->mTimeout_ms = 0;
