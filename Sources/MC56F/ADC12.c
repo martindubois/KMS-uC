@@ -5,6 +5,13 @@
 // Product   KMS-uC
 // File      Sources/MC56F/ADC12.c
 
+// References
+// //////////////////////////////////////////////////////////////////////////
+//
+// MC56F8458x Reference Manual with Addendum
+// https://www.nxp.com/docs/en/reference-manual/MC56F8458XRM.pdf
+// Chapter 25 - 12-bit Cyclic Analog-to-Digital Converter (ADC12)
+
 // Assumptions
 // //////////////////////////////////////////////////////////////////////////
 //
