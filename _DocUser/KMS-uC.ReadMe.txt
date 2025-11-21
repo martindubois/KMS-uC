@@ -1,9 +1,12 @@
 
 Author    KMS - Martin Dubois, P. Eng.
-Copyright (C) 2024 KMS
+Copyright (C) 2024-2025 KMS
 License   http://www.apache.org/licenses/LICENSE-2.0
 Product   KMS-uC
 File      _DocUser/KMS-uC.ReadMe.txt
+
+1.0.1 2025-11-21
+* Filter_FIR, Filter_IIR, Filter_MD and PID modules
 
 1.0.0 2024-10-04
 - MC56F84565

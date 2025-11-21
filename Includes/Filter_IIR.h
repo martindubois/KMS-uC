@@ -1,9 +1,9 @@
 
 // Author    KMS - Martin Dubois, P. Eng.
-// Copyright (C) 2024 KMS
+// Copyright (C) 2024-2025 KMS
 // License   http://www.apache.org/licenses/LICENSE-2.0
 // Product   KMS-uC
-// File      Includes/Filter.h
+// File      Includes/Filter_IIR.h
 
 #pragma once
 
