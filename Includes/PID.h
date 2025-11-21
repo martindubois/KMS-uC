@@ -57,7 +57,7 @@ extern void PID_Tick(PID* aThis, uint8_t aPeriod_ms);
 
 // ===== Inline =============================================================
 
-inline int32_t PID_GetOutput_FP(const PID* aThis) { return aThis->mOutput_FP; };
+inline int32_t PID_GetOutput_FP(const PID* aThis) { return aThis->mOutput_FP; }
 
 #ifdef __cplusplus
     }

@@ -55,9 +55,19 @@
 			<locationURI>PARENT-3-PROJECT_LOC/Sources/Expander.c</locationURI>
 		</link>
 		<link>
-			<name>Common/Filter.c</name>
+			<name>Common/Filter_FIR.c</name>
 			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/Sources/Filter.c</locationURI>
+			<locationURI>PARENT-3-PROJECT_LOC/Sources/Filter_FIR.c</locationURI>
+		</link>
+		<link>
+			<name>Common/Filter_IIR.c</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/Sources/Filter_IIR.c</locationURI>
+		</link>
+		<link>
+			<name>Common/Filter_MD.c</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/Sources/Filter_MD.c</locationURI>
 		</link>
 		<link>
 			<name>Common/GPIO.c</name>
@@ -83,6 +93,11 @@
 			<name>Common/Modbus_Slave.c</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/Sources/Modbus_Slave.c</locationURI>
+		</link>
+		<link>
+			<name>Common/PID.c</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/Sources/PID.c</locationURI>
 		</link>
 		<link>
 			<name>Common/PWMA.c</name>
