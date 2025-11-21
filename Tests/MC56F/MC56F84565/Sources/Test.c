@@ -11,6 +11,7 @@
 
 // ==== Includes ============================================================
 #include "ADC.h"
+#include "EEPROM.h"
 #include "Expander.h"
 #include "GPIO.h"
 #include "I2C.h"
@@ -31,6 +32,7 @@
 // #define _TEST_ADC12_
 // #define _TEST_MODBUS_SLAVE_
 // #define _TEST_PWMA_
+// #define _TEST_EEPROM_
 #define _TEST_EXPANDER_
 
 // Variables
@@ -49,6 +51,11 @@ static uint8_t ADC_CHANNELS[] =
 
 static GPIO ANALOG_0;
 static GPIO ANALOG_14;
+
+#define EEPROM_QTY       (2)
+#define EEPROM_SIZE_byte (256)
+
+static GPIO EEPROM_WRITE_PROTECT;
 
 static GPIO EXPANDER_INT;
 static GPIO EXPANDER_RESET;
@@ -89,6 +96,9 @@ void Test_Init0()
     ANALOG_14.mBit  = 6;
     ANALOG_14.mPort = GPIO_PORT_B;
 
+    EEPROM_WRITE_PROTECT.mBit      = 13;
+    EEPROM_WRITE_PROTECT.mPushPull = 1;
+
     EXPANDER_INT.mBit           = 10;
     EXPANDER_INT.mPull_Enable   = 1;
     EXPANDER_INT.mPullUp_Select = 1;
@@ -117,6 +127,7 @@ void Test_Init0()
     PWMA_1_A.mPort = GPIO_PORT_E;
 
     #ifdef _BOARD_NK_E1_CTRL_
+        EEPROM_WRITE_PROTECT.mPort = GPIO_PORT_C;
         EXPANDER_INT        .mPort = GPIO_PORT_C;
         EXPANDER_RESET      .mPort = GPIO_PORT_F;
         MODBUS_OUTPUT_ENABLE.mPort = GPIO_PORT_C;
@@ -125,6 +136,7 @@ void Test_Init0()
     #endif
 
     #ifdef _BOARD_UNKNOWN_
+        EEPROM_WRITE_PROTECT.mPort = GPIO_PORT_DUMMY;
         EXPANDER_INT        .mPort = GPIO_PORT_DUMMY;
         EXPANDER_RESET      .mPort = GPIO_PORT_DUMMY;
         MODBUS_OUTPUT_ENABLE.mPort = GPIO_PORT_DUMMY;
@@ -137,12 +149,34 @@ void Test_Init0()
 
 void Test_Main()
 {
+    static uint8_t sBuffers[EEPROM_QTY][4];
+    static EEPROM  sEEPROMs[EEPROM_QTY];
+
+    unsigned int i;
+
     #ifdef _TEST_ADC12_
 
         GPIO_InitFunction(ANALOG_0 , 0);
         GPIO_InitFunction(ANALOG_14, 0);
 
         ADC_Init(ADC_CHANNELS, sizeof(ADC_CHANNELS) / sizeof(ADC_CHANNELS[0]), ADC_INTERRUPT_END_OF_SCAN);
+
+    #endif
+
+    #ifdef _TEST_EEPROM_
+
+        EEPROM_InitWriteProtect(EEPROM_WRITE_PROTECT);
+
+        EEPROM_Init(sEEPROMs + 0, 0, 0xa0, EEPROM_WRITE_PROTECT);
+        EEPROM_Init(sEEPROMs + 1, 0, 0xa2, EEPROM_WRITE_PROTECT);
+
+        I2C_Init(0);
+
+        for (i = 0; i < 1; i++)
+        {
+            EEPROM_Erase(sEEPROMs + 0, 0, EEPROM_SIZE_byte);
+            // EEPROM_Read(sEEPROMs + 0, 0, sBuffers[i], sizeof(sBuffers[i]));
+        }
 
     #endif
 
@@ -188,6 +222,13 @@ void Test_Main()
     {
         uint16_t lPeriod_ms;
 
+        #ifdef _TEST_EEPROM_
+            for (i = 0; i < EEPROM_QTY; i++)
+            {
+                EEPROM_Work(sEEPROMs + i);
+            }
+        #endif
+
         #ifdef _TEST_MODBUS_SLAVE_
             Modbus_Slave_Work();
         #endif
@@ -195,6 +236,26 @@ void Test_Main()
         lPeriod_ms = Tick_Work();
         if (0 < lPeriod_ms)
         {
+            #ifdef _TEST_EEPROM_
+                for (i = 0; i < 1; i++)
+                {
+                    EEPROM_Tick(sEEPROMs + i, lPeriod_ms);
+
+                    switch (EEPROM_Status(sEEPROMs + i))
+                    {
+                    case EEPROM_ERROR:
+                    case EEPROM_PENDING:
+                        break;
+
+                    case EEPROM_SUCCESS:
+                        EEPROM_Erase_Verify(sEEPROMs + i, 0, EEPROM_SIZE_byte);
+                        break;
+
+                    // default: assert(false);
+                    }
+                }
+            #endif
+
             #ifdef _TEST_EXPANDER_
                 Expander_Tick(lPeriod_ms);
             #endif

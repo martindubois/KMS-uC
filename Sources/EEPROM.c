@@ -7,6 +7,9 @@
 
 // References
 // //////////////////////////////////////////////////////////////////////////
+//
+// 24AA04/24LC04B/24FC04 - 4K I2C Serial EEPROM
+// https://ww1.microchip.com/downloads/en/DeviceDoc/24AA04-24LC04B-24FC04-4K-I2C-Serial-EEPROM-20001708P.pdf
 
 // Assumptions
 // //////////////////////////////////////////////////////////////////////////
@@ -89,6 +92,10 @@
 
 static void Buffer_Clear(EEPROM* aThis);
 
+static void ConfigWriteProtect(GPIO* aWP);
+
+static void SetState_ERROR(EEPROM* aThis);
+
 static void Start_AddressState(EEPROM* aThis, unsigned int aNextState);
 static void Start_ReadState   (EEPROM* aThis, unsigned int aNextState);
 static void Start_WriteState  (EEPROM* aThis, unsigned int aNextState);
@@ -108,16 +115,24 @@ static void Work_WRITE_WAIT       (EEPROM* aThis);
 // Functions
 // //////////////////////////////////////////////////////////////////////////
 
+void EEPROM_InitWriteProtect(GPIO aWriteProtect)
+{
+    GPIO lWP = aWriteProtect;
+
+    ConfigWriteProtect(&lWP);
+
+    GPIO_Init(lWP);
+
+    GPIO_Output(lWP, WRITE_PROTECT_ON);
+}
+
 void EEPROM_Init(EEPROM* aThis, uint8_t aBusIndex, uint8_t aDeviceAddress, GPIO aWriteProtect)
 {
     I2C_Device_Init(&aThis->mDevice, aBusIndex, aDeviceAddress);
 
     aThis->mWriteProtect = aWriteProtect;
 
-    aThis->mWriteProtect.mOutput        = 1;
-    aThis->mWriteProtect.mSlewRate_Slow = 1;
-
-    GPIO_Init(aThis->mWriteProtect);
+    ConfigWriteProtect(&aThis->mWriteProtect);
 }
 
 void EEPROM_Erase(EEPROM* aThis, uint16_t aAddress, uint16_t aSize_byte)
@@ -213,6 +228,8 @@ void EEPROM_Write(EEPROM* aThis, uint16_t aAddress, const void* aIn, uint16_t aI
     aThis->mDataPtr       = (void*)aIn;
     aThis->mDataSize_byte = aInSize_byte;
 
+    GPIO_Output(aThis->mWriteProtect, WRITE_PROTECT_OFF);
+
     Start_WriteState(aThis, STATE_WRITE);
 }
 
@@ -247,7 +264,7 @@ void EEPROM_Tick(EEPROM* aThis, uint16_t aPeriod_ms)
         if (aThis->mTimeout_ms <= aPeriod_ms)
         {
             aThis->mTimeout_ms = 0;
-            aThis->mState = STATE_ERROR;
+            SetState_ERROR(aThis);
         }
         else
         {
@@ -289,6 +306,19 @@ void EEPROM_Work(EEPROM* aThis)
 void Buffer_Clear(EEPROM* aThis)
 {
     memset(&aThis->mBuffer, ERASE_BYTE, sizeof(aThis->mBuffer));
+}
+
+void ConfigWriteProtect(GPIO* aWP)
+{
+    // assert(NULL != aWP);
+
+    aWP->mOutput        = 1;
+    aWP->mSlewRate_Slow = 1;
+}
+
+void SetState_ERROR(EEPROM* aThis)
+{
+    aThis->mState = STATE_ERROR;
 }
 
 void Start_AddressState(EEPROM* aThis, unsigned int aNextState)
@@ -361,7 +391,7 @@ void Work_WriteState(EEPROM* aThis, unsigned int aNextState)
     {
     case I2C_ERROR:
         GPIO_Output(aThis->mWriteProtect, WRITE_PROTECT_ON);
-        aThis->mState = STATE_ERROR;
+        SetState_ERROR(aThis);
         break;
 
     case I2C_PENDING: break;
@@ -378,7 +408,7 @@ void Work_ERASE_VERIFY_ADDR(EEPROM* aThis)
 
     switch (I2C_Device_Status(aThis->mDevice))
     {
-    case I2C_ERROR: aThis->mState = STATE_ERROR; break;
+    case I2C_ERROR: SetState_ERROR(aThis); break;
 
     case I2C_PENDING: break;
 
@@ -402,7 +432,7 @@ void Work_ERASE_VERIFY_DATA(EEPROM* aThis)
 
     switch (I2C_Device_Status(aThis->mDevice))
     {
-    case I2C_ERROR: aThis->mState = STATE_ERROR; break;
+    case I2C_ERROR: SetState_ERROR(aThis); break;
 
     case I2C_PENDING: break;
 
@@ -411,7 +441,7 @@ void Work_ERASE_VERIFY_DATA(EEPROM* aThis)
         {
             if (ERASE_BYTE != aThis->mBuffer[i])
             {
-                aThis->mState = STATE_ERROR;
+                SetState_ERROR(aThis);
                 return;
             }
         }
@@ -470,7 +500,7 @@ void Work_READ_ADDR(EEPROM* aThis)
 
     switch (I2C_Device_Status(aThis->mDevice))
     {
-    case I2C_ERROR: aThis->mState = STATE_ERROR; break;
+    case I2C_ERROR: SetState_ERROR(aThis); break;
 
     case I2C_PENDING: break;
 
@@ -489,7 +519,7 @@ void Work_READ_DATA(EEPROM* aThis)
 
     switch (I2C_Device_Status(aThis->mDevice))
     {
-    case I2C_ERROR: aThis->mState = STATE_ERROR; break;
+    case I2C_ERROR: SetState_ERROR(aThis); break;
 
     case I2C_PENDING: break;
 
@@ -518,7 +548,7 @@ void Work_VERIFY_ADDR(EEPROM* aThis)
 
     switch (I2C_Device_Status(aThis->mDevice))
     {
-    case I2C_ERROR: aThis->mState = STATE_ERROR; break;
+    case I2C_ERROR: SetState_ERROR(aThis); break;
 
     case I2C_PENDING: break;
 
@@ -543,7 +573,7 @@ void Work_VERIFY_DATA(EEPROM* aThis)
 
     switch (I2C_Device_Status(aThis->mDevice))
     {
-    case I2C_ERROR: aThis->mState = STATE_ERROR; break;
+    case I2C_ERROR: SetState_ERROR(aThis); break;
 
     case I2C_PENDING: break;
 
@@ -552,7 +582,7 @@ void Work_VERIFY_DATA(EEPROM* aThis)
         {
             if (aThis->mDataPtr[i] != aThis->mBuffer[i])
             {
-                aThis->mState = STATE_ERROR;
+                SetState_ERROR(aThis);
                 return;
             }
         }

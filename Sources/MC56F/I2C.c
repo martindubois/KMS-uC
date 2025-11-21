@@ -79,7 +79,7 @@ typedef struct
 
     uint16_t     mDummy;
 }
-Context;
+I2C_Context;
 
 typedef struct
 {
@@ -138,25 +138,25 @@ static const uint16_t SIM_PCE1_BITS[I2C_QTY] = { 0x0040, 0x0020 };
 // Variables
 // //////////////////////////////////////////////////////////////////////////
 
-static Context sContexts[I2C_QTY];
+static I2C_Context sContexts[I2C_QTY];
 
 // Static function declarations
 // //////////////////////////////////////////////////////////////////////////
 
-static void Interrupt(Context* aThis);
+static void Interrupt(I2C_Context* aThis);
 
-static void Interrupt_Disable(Context* aThis);
-static void Interrupt_Enable (Context* aThis);
+static void Interrupt_Disable(I2C_Context* aThis);
+static void Interrupt_Enable (I2C_Context* aThis);
 
-static void Interrupt_RX_DATA  (Context* aThis);
-static void Interrupt_TX_ADDR  (Context* aThis, uint16_t aStatus);
-static void Interrupt_TX_DATA  (Context* aThis, uint16_t aStatus);
-static void Interrupt_TX_DEVICE(Context* aThis, uint16_t aStatus);
+static void Interrupt_RX_DATA  (I2C_Context* aThis);
+static void Interrupt_TX_ADDR  (I2C_Context* aThis, uint16_t aStatus);
+static void Interrupt_TX_DATA  (I2C_Context* aThis, uint16_t aStatus);
+static void Interrupt_TX_DEVICE(I2C_Context* aThis, uint16_t aStatus);
 
-static void SetState_ERROR    (Context* aThis);
-static void SetState_COMPLETED(Context* aThis);
+static void SetState_ERROR    (I2C_Context* aThis);
+static void SetState_COMPLETED(I2C_Context* aThis);
 
-static void Start_TX_DEVICE(Context* aThis);
+static void Start_TX_DEVICE(I2C_Context* aThis);
 
 // Entry points
 // //////////////////////////////////////////////////////////////////////////
@@ -229,8 +229,8 @@ uint8_t I2C_Status(uint8_t aIndex)
 {
     // assert(I2C_QTY > aIndex);
 
-    uint8_t  lResult = I2C_ERROR;
-    Context* lThis   = sContexts + aIndex;
+    uint8_t      lResult = I2C_ERROR;
+    I2C_Context* lThis   = sContexts + aIndex;
 
     switch (lThis->mState)
     {
@@ -245,6 +245,7 @@ uint8_t I2C_Status(uint8_t aIndex)
 
     case STATE_RX_DATA:
     case STATE_TX_ADDR:
+    case STATE_TX_DATA:
     case STATE_TX_DEVICE:
         lResult = I2C_PENDING;
         break;
@@ -263,7 +264,7 @@ void I2C_Read(uint8_t aIndex, uint8_t aDevice, void* aOut, uint8_t aOutSize_byte
     // assert(NULL != aOut);
     // assert(0 < aOutSize_byte);
 
-    Context* lThis = sContexts + aIndex;
+    I2C_Context* lThis = sContexts + aIndex;
 
     lThis->mDataPtr       = aOut;
     lThis->mDataSize_byte = aOutSize_byte;
@@ -277,7 +278,7 @@ void I2C_Write(uint8_t aIndex, uint8_t aDevice, uint8_t aAddress, const void* aI
     // assert(I2C_QTY > aIndex);
     // assert(0 == (aDevice & I2C_READ_BIT));
 
-    Context* lThis = sContexts + aIndex;
+    I2C_Context* lThis = sContexts + aIndex;
 
     lThis->mAddress       = aAddress;
     lThis->mDataPtr       = (void*)aIn;
@@ -291,7 +292,7 @@ void I2C_Tick(uint8_t aIndex, uint16_t aPeriod_ms)
 {
     // assert(I2C_QTY > aIndex);
 
-    Context* lThis = sContexts + aIndex;
+    I2C_Context* lThis = sContexts + aIndex;
 
     Interrupt_Disable(lThis);
     {
@@ -329,7 +330,7 @@ void I2C_Tick(uint8_t aIndex, uint16_t aPeriod_ms)
 // Static functions
 // //////////////////////////////////////////////////////////////////////////
 
-void Interrupt(Context* aThis)
+void Interrupt(I2C_Context* aThis)
 {
     // assert(I2C_QTY > aThis->mIndex);
     // assert(STATE_QTY > aThis->mState);
@@ -386,7 +387,7 @@ void Interrupt(Context* aThis)
     lR->mStatus = S_IICIF;
 }
 
-void Interrupt_Disable(Context* aThis)
+void Interrupt_Disable(I2C_Context* aThis)
 {
     // assert(I2C_QTY > aThis->mIndex);
 
@@ -395,7 +396,7 @@ void Interrupt_Disable(Context* aThis)
     lR->mControl1 &= ~ C1_IICIE;
 }
 
-void Interrupt_Enable(Context* aThis)
+void Interrupt_Enable(I2C_Context* aThis)
 {
     // assert(I2C_QTY > aThis->mIndex);
 
@@ -404,7 +405,7 @@ void Interrupt_Enable(Context* aThis)
     lR->mControl1 |= C1_IICIE;
 }
 
-void Interrupt_RX_DATA(Context* aThis)
+void Interrupt_RX_DATA(I2C_Context* aThis)
 {
     // assert(NULL != aThis->mDataPtr);
     // assert(I2C_QTY > aThis->mIndex);
@@ -430,7 +431,7 @@ void Interrupt_RX_DATA(Context* aThis)
     }
 }
 
-void Interrupt_TX_ADDR(Context* aThis, uint16_t aStatus)
+void Interrupt_TX_ADDR(I2C_Context* aThis, uint16_t aStatus)
 {
     // assert(I2C_QTY > aThis->mIndex);
     // assert(STATE_TX_ADDR == aThis->mState);
@@ -440,7 +441,7 @@ void Interrupt_TX_ADDR(Context* aThis, uint16_t aStatus)
     Interrupt_TX_DATA(aThis, aStatus);
 }
 
-void Interrupt_TX_DATA(Context* aThis, uint16_t aStatus)
+void Interrupt_TX_DATA(I2C_Context* aThis, uint16_t aStatus)
 {
     // assert(I2C_QTY > aThis->mIndex);
 
@@ -471,7 +472,7 @@ void Interrupt_TX_DATA(Context* aThis, uint16_t aStatus)
     }
 }
 
-void Interrupt_TX_DEVICE(Context* aThis, uint16_t aStatus)
+void Interrupt_TX_DEVICE(I2C_Context* aThis, uint16_t aStatus)
 {
     // assert(I2C_QTY > aThis->mIndex);
     // assert(STATE_TX_DVICE == aThis->mState);
@@ -505,7 +506,7 @@ void Interrupt_TX_DEVICE(Context* aThis, uint16_t aStatus)
     }
 }
 
-void SetState_COMPLETED(Context* aThis)
+void SetState_COMPLETED(I2C_Context* aThis)
 {
     // assert((STATE_RX_DATA == aThis->mState) || (STATE_TX_DATA == aThis->mState));
     // assert(0 < aThis->mTimeout_ms);
@@ -514,7 +515,7 @@ void SetState_COMPLETED(Context* aThis)
     aThis->mTimeout_ms = 0;
 }
 
-void SetState_ERROR(Context* aThis)
+void SetState_ERROR(I2C_Context* aThis)
 {
     // assert(I2C_QTY > aThis->mIndex);
     // assert(STATE_QTY > aThis->mState);
@@ -528,7 +529,7 @@ void SetState_ERROR(Context* aThis)
     aThis->mTimeout_ms = 0;
 }
 
-void Start_TX_DEVICE(Context* aThis)
+void Start_TX_DEVICE(I2C_Context* aThis)
 {
     // assert(I2C_QTY > aThis->mIndex);
     // assert((STATE_ERROR == aThis->mState) || (STATE_IDLE == aThis->mState));

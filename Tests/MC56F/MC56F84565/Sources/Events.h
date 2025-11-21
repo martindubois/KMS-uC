@@ -1,35 +1,39 @@
 /* ###################################################################
-**     Filename    : main.c
+**     Filename    : Events.h
 **     Project     : MC56F84565
 **     Processor   : MC56F84565VLK
-**     Version     : Driver 01.16
+**     Component   : Events
+**     Version     : Driver 01.03
 **     Compiler    : CodeWarrior DSP C Compiler
 **     Date/Time   : 2024-09-25, 13:21, # CodeGen: 0
 **     Abstract    :
-**         Main module.
-**         This module contains user's application code.
+**         This is user's event module.
+**         Put your event handler code here.
 **     Settings    :
 **     Contents    :
 **         No public methods
 **
 ** ###################################################################*/
 /*!
-** @file main.c
-** @version 01.16
+** @file Events.h
+** @version 01.03
 ** @brief
-**         Main module.
-**         This module contains user's application code.
+**         This is user's event module.
+**         Put your event handler code here.
 */         
 /*!
-**  @addtogroup main_module main module documentation
+**  @addtogroup Events_module Events module documentation
 **  @{
 */         
-/* MODULE main */
 
+#ifndef __Events_H
+#define __Events_H
+/* MODULE Events */
 
-/* Including needed modules to compile this module/procedure */
-#include "Cpu.h"
-#include "Events.h"
+#include "PE_Types.h"
+#include "PE_Error.h"
+#include "PE_Const.h"
+#include "IO_Map.h"
 #include "INT_eFlexPWMA_CAP.h"
 #include "INT_ADC12_CC0.h"
 #include "INT_QSCI0_RERR.h"
@@ -39,30 +43,11 @@
 #include "INT_GPIOC.h"
 #include "INT_IIC1.h"
 #include "INT_IIC0.h"
-/* Including shared modules, which are used for whole project */
-#include "PE_Types.h"
-#include "PE_Error.h"
-#include "PE_Const.h"
-#include "IO_Map.h"
 
-#include "Test.h"
 
-void main(void)
-{
-  /* Write your local variable definition here */
-  Test_Init0();
+/* END Events */
+#endif /* __Events_H*/
 
-  /*** Processor Expert internal initialization. DON'T REMOVE THIS CODE!!! ***/
-  PE_low_level_init();
-  /*** End of Processor Expert internal initialization.                    ***/
-
-  /* Write your code here */
-  Test_Main();
-
-  for(;;) {}
-}
-
-/* END main */
 /*!
 ** @}
 */

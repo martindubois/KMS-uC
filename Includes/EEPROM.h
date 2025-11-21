@@ -39,9 +39,8 @@ EEPROM;
 // Functions
 // //////////////////////////////////////////////////////////////////////////
 
-// aBusIndex       Index of the I2C port
-// aDeviceAddress  I2C device address
-// aWriteProtect   The write protect pin.
+// aWriteProtect   The write protect pin. This function use GPIO_Init to
+//                 initialise it.
 //                     .mBit
 //                     .mDrive
 //                     .mInterrupt_Falling
@@ -51,6 +50,11 @@ EEPROM;
 //                     .mPullUp_Select
 //                     .mPushPull
 //                     .mSlewRate_Slow     : Ignored, must be set
+void EEPROM_InitWriteProtect(GPIO aWriteProtect);
+
+// aBusIndex       Index of the I2C port
+// aDeviceAddress  I2C device address
+// aWriteProtect   The write protect pin. See EEPROM_InitWriteProtect.
 extern void EEPROM_Init(EEPROM* aThis, uint8_t aBusIndex, uint8_t aDeviceAddress, GPIO aWriteProtect);
 
 extern void EEPROM_Erase(EEPROM* aThis, uint16_t aAddress, uint16_t aSize_byte);
