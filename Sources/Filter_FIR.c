@@ -1,9 +1,9 @@
 
 // Author    KMS - Martin Dubois, P. Eng.
-// Copyright (C) 2024 KMS
+// Copyright (C) 2025 KMS
 // License   http://www.apache.org/licenses/LICENSE-2.0
 // Product   KMS-uC
-// File      Sources/Filter.c
+// File      Sources/Filter_FIR.c
 
 // References
 // //////////////////////////////////////////////////////////////////////////
@@ -21,25 +21,34 @@
 #include <stdint.h>
 
 // ===== Includes ===========================================================
-#include "Filter.h"
+#include "Filter_FIR.h"
 
 // Functions
 // //////////////////////////////////////////////////////////////////////////
 
-void Filter_IIR_Signed_NewSample(Filter_IIR_Signed* aThis, int16_t aNewValue)
+int32_t Filter_FIR_GetOutput_FP(Filter_FIR* aThis)
 {
-    // assert(0 < aThis->mN);
+    if (0 < aThis->mCount)
+    {
+        aThis->mSum_FP /= aThis->mCount;
+        aThis->mOutput_FP = aThis->mSum_FP;
 
-    aThis->mAccu -= aThis->mValue;
-    aThis->mAccu += aNewValue;
-    aThis->mValue = (int16_t)(aThis->mAccu / aThis->mN);
+        aThis->mCount  = 0;
+        aThis->mSum_FP = 0;
+    }
+
+    return aThis->mOutput_FP;
 }
 
-void Filter_IIR_Unsigned_NewSample(Filter_IIR_Unsigned* aThis, uint16_t aNewValue)
+void Filter_FIR_NewSample(Filter_FIR* aThis, int32_t aNewValue_FP)
 {
-    // assert(0 < aThis->mN);
+    aThis->mCount++;
+    aThis->mSum_FP += aNewValue_FP;
+}
 
-    aThis->mAccu -= aThis->mValue;
-    aThis->mAccu += aNewValue;
-    aThis->mValue = (uint16_t)(aThis->mAccu / aThis->mN);
+void Filter_FIR_Reset(Filter_FIR* aThis)
+{
+    aThis->mSum_FP = 0;
+    aThis->mCount = 0;
+    aThis->mOutput_FP = 0;
 }
