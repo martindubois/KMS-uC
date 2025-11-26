@@ -30,6 +30,8 @@ Filter_FIR;
 
 extern int32_t Filter_FIR_GetOutput_FP(Filter_FIR* aThis);
 
+extern void Filter_FIR_Clone(Filter_FIR* aThis, const Filter_FIR* aToClone);
+
 extern void Filter_FIR_NewSample(Filter_FIR* aThis, int32_t aNewValue_FP);
 
 extern void Filter_FIR_Reset(Filter_FIR* aThis);
