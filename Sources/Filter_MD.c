@@ -45,7 +45,7 @@ extern void Filter_MD_Tick(Filter_MD* aThis, uint8_t aPeriod_ms)
     aThis->mCounter_ms += aPeriod_ms;
     if (aThis->mTable->mPeriod_ms <= aThis->mCounter_ms)
     {
-        int16_t lOutput = aThis->mOutput_FP >> 8;
+        int16_t lOutput = (int16_t)(aThis->mOutput_FP >> 8);
 
         aThis->mCounter_ms -= aThis->mTable->mPeriod_ms;
 
@@ -54,8 +54,8 @@ extern void Filter_MD_Tick(Filter_MD* aThis, uint8_t aPeriod_ms)
             int16_t lIndex = lOutput / aThis->mTable->mStep;
             if (aThis->mTable->mLength > lIndex)
             {
-                uint32_t lDelta_FP;
-                uint16_t lMax_FP;
+                int32_t lDelta_FP;
+                int16_t lMax_FP;
 
                 if (aThis->mInput_FP > aThis->mOutput_FP)
                 {

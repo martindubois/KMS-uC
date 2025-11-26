@@ -63,6 +63,8 @@ extern void Filter_MD_Tick(Filter_MD* aThis, uint8_t aPeriod_ms);
 
 // ===== Inline =============================================================
 
+inline int32_t Filter_MD_GetInput_FP(const Filter_MD* aThis) { return aThis->mInput_FP; }
+
 inline int32_t Filter_MD_GetOutput_FP(const Filter_MD* aThis) { return aThis->mOutput_FP; }
 
 inline void Filter_MD_SetInput(Filter_MD* aThis, int32_t aInput_FP) { aThis->mInput_FP = aInput_FP; }
