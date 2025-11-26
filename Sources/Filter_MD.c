@@ -26,18 +26,24 @@
 // Functions
 // //////////////////////////////////////////////////////////////////////////
 
-void Filter_MD_Init(Filter_MD* aThis, const Filter_MD_Table* aTable)
+void Filter_MD_Init(Filter_MD* aThis, const Filter_MD_Table* aTable, Filter_MD_InputFunction aActual)
 {
-    aThis->mTable = aTable;
-
-    Filter_MD_Reset(aThis, 0);
+    aThis->mActual = aActual;
+    aThis->mCounter_ms = 0;
+    aThis->mInput_FP = 0;
+    aThis->mOutput_FP = 0;
+    aThis->mTable  = aTable;
 }
 
-extern void Filter_MD_Reset(Filter_MD* aThis, int32_t aInput_FP)
+// aThis
+// aInput_FP  (fixed point 24.8)
+inline void Filter_MD_SetInput(Filter_MD* aThis, int32_t aInput_FP)
 {
-    aThis->mCounter_ms = 0;
-    aThis->mInput_FP   = aInput_FP;
-    aThis->mOutput_FP  = aInput_FP;
+    if (aThis->mInput_FP != aInput_FP)
+    {
+        aThis->mInput_FP = aInput_FP;
+        aThis->mOutput_FP = (0 == aInput_FP) ? 0 : aThis->mActual();
+    }
 }
 
 extern void Filter_MD_Tick(Filter_MD* aThis, uint8_t aPeriod_ms)
@@ -45,6 +51,7 @@ extern void Filter_MD_Tick(Filter_MD* aThis, uint8_t aPeriod_ms)
     aThis->mCounter_ms += aPeriod_ms;
     if (aThis->mTable->mPeriod_ms <= aThis->mCounter_ms)
     {
+        int32_t lActual_FP = aThis->mActual();
         int16_t lOutput = (int16_t)(aThis->mOutput_FP >> 8);
 
         aThis->mCounter_ms -= aThis->mTable->mPeriod_ms;

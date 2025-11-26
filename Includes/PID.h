@@ -8,8 +8,6 @@
 #pragma once
 
 // ===== Local ==============================================================
-struct Filter_MD_s;
-
 #ifdef __cplusplus
     extern "C" {
 #endif
@@ -17,15 +15,19 @@ struct Filter_MD_s;
 // Data types
 // //////////////////////////////////////////////////////////////////////////
 
-// mP
-// mI
-// mD
-// mIntegrator
-// mLastInput
-// mOutput
+// Return  (fixed point 24.8)
+typedef int32_t (*PID_InputFunction)();
+
+// mP              Gain Proportional
+// mI              Gain Integrator
+// mD              Gain Derivative
+// mError_FP       (fixed point 24.8)
+// mIntegrator_FP  (fixed point 24.8)
+// mOutput_FP      (fixed point 24.8)
 // mConsign
 // mInput
 // mCounter_ms
+// mPeriod_ms      Default = 100 ms, Max = 100 ms
 typedef struct
 {
     int32_t mP;
@@ -36,8 +38,8 @@ typedef struct
     int32_t mIntegrator_FP;
     int32_t mOutput_FP;
 
-    struct Filter_MD_s * mConsign;
-    struct Filter_FIR_s* mInput;
+    PID_InputFunction mConsign;
+    PID_InputFunction mInput;
 
     uint8_t mCounter_ms;
     uint8_t mPeriod_ms;
@@ -47,16 +49,29 @@ PID;
 // Functions
 // //////////////////////////////////////////////////////////////////////////
 
-extern void PID_Init(PID* aThis, struct Filter_MD_s* aConsign, struct Filter_FIR_s* aInput);
+// aThis
+// aConsign  Function to call to retrieve the filtered consign
+// aInput    Function to call to retrieve input
+extern void PID_Init(PID* aThis, PID_InputFunction aConsign, PID_InputFunction aInput);
 
+// aThis
+// aP     Gain Proportional
+// aI     Gain Integrator
+// aD     Gain Derivative
 extern void PID_SetParams(PID* aThis, int32_t aP, int32_t aI, int32_t aD);
 
+// aThis
 extern void PID_Reset(PID* aThis);
 
+// aThis
+// aPeriod_ms  Max = 100 ms
 extern void PID_Tick(PID* aThis, uint8_t aPeriod_ms);
 
 // ===== Inline =============================================================
 
+// aThis
+//
+// Returm  (fixed point 24.8)
 inline int32_t PID_GetOutput_FP(const PID* aThis) { return aThis->mOutput_FP; }
 
 #ifdef __cplusplus

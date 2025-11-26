@@ -37,7 +37,7 @@
 // Functions
 // //////////////////////////////////////////////////////////////////////////
 
-void PID_Init(PID* aThis, Filter_MD* aConsign, Filter_FIR* aInput)
+void PID_Init(PID* aThis, PID_InputFunction aConsign, PID_InputFunction aInput)
 {
     aThis->mConsign = aConsign;
     aThis->mInput   = aInput;
@@ -71,8 +71,8 @@ void PID_Tick(PID* aThis, uint8_t aPeriod_ms)
     aThis->mCounter_ms += aPeriod_ms;
     if (aThis->mPeriod_ms <= aThis->mCounter_ms)
     {
-        int32_t lConsign_FP = Filter_MD_GetOutput_FP(aThis->mConsign);
-        int32_t lInput_FP   = Filter_FIR_GetOutput_FP(aThis->mInput);
+        int32_t lConsign_FP = aThis->mConsign();
+        int32_t lInput_FP   = aThis->mInput  ();
         int32_t lError_FP   = lConsign_FP - lInput_FP;
         int32_t lDelta_FP   = lError_FP - aThis->mError_FP;
 

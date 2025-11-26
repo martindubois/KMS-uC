@@ -26,20 +26,6 @@
 // Functions
 // //////////////////////////////////////////////////////////////////////////
 
-int32_t Filter_FIR_GetOutput_FP(Filter_FIR* aThis)
-{
-    if (0 < aThis->mCount)
-    {
-        aThis->mSum_FP /= aThis->mCount;
-        aThis->mOutput_FP = aThis->mSum_FP;
-
-        aThis->mCount  = 0;
-        aThis->mSum_FP = 0;
-    }
-
-    return aThis->mOutput_FP;
-}
-
 void Filter_FIR_Clone(Filter_FIR* aThis, const Filter_FIR* aToClone)
 {
     aThis->mCount     = aToClone->mCount;
@@ -51,6 +37,15 @@ void Filter_FIR_NewSample(Filter_FIR* aThis, int32_t aNewValue_FP)
 {
     aThis->mCount++;
     aThis->mSum_FP += aNewValue_FP;
+
+    if (aThis->mPeriod <= aThis->mCount)
+    {
+        aThis->mSum_FP /= aThis->mCount;
+        aThis->mOutput_FP = aThis->mSum_FP;
+
+        aThis->mCount  = 0;
+        aThis->mSum_FP = 0;
+    }
 }
 
 void Filter_FIR_Reset(Filter_FIR* aThis)
