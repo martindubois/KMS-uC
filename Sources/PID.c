@@ -46,11 +46,9 @@ void PID_Init(PID* aThis, Filter_MD* aConsign, Filter_FIR* aInput)
     aThis->mI = 0;
     aThis->mD = 0;
 
-    aThis->mCounter_ms    = 0;
-    aThis->mError_FP      = 0;
-    aThis->mIntegrator_FP = 0;
-    aThis->mOutput_FP     = 0;
-    aThis->mPeriod_ms     = DEFAULT_PERIOD_ms;
+    aThis->mPeriod_ms = DEFAULT_PERIOD_ms;
+
+    PID_Reset(aThis);
 }
 
 void PID_SetParams(PID* aThis, int32_t aP, int32_t aI, int32_t aD)
@@ -58,6 +56,14 @@ void PID_SetParams(PID* aThis, int32_t aP, int32_t aI, int32_t aD)
     aThis->mP = aP;
     aThis->mI = aI;
     aThis->mD = aD;
+}
+
+void PID_Reset(PID* aThis)
+{
+    aThis->mCounter_ms    = 0;
+    aThis->mError_FP      = 0;
+    aThis->mIntegrator_FP = 0;
+    aThis->mOutput_FP     = 0;
 }
 
 void PID_Tick(PID* aThis, uint8_t aPeriod_ms)
