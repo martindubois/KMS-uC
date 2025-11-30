@@ -26,13 +26,6 @@
 // Functions
 // //////////////////////////////////////////////////////////////////////////
 
-void Filter_FIR_Clone(Filter_FIR* aThis, const Filter_FIR* aToClone)
-{
-    aThis->mCount     = aToClone->mCount;
-    aThis->mOutput_FP = aToClone->mOutput_FP;
-    aThis->mSum_FP    = aToClone->mSum_FP;
-}
-
 void Filter_FIR_NewSample(Filter_FIR* aThis, int32_t aNewValue_FP)
 {
     aThis->mCount++;

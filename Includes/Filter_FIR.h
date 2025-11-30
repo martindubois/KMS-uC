@@ -31,10 +31,6 @@ Filter_FIR;
 // //////////////////////////////////////////////////////////////////////////
 
 // aThis
-// aToClone
-extern void Filter_FIR_Clone(Filter_FIR* aThis, const Filter_FIR* aToClone);
-
-// aThis
 // aNewValue_FP  (fixed point 24.8)
 extern void Filter_FIR_NewSample(Filter_FIR* aThis, int32_t aNewValue_FP);
 
