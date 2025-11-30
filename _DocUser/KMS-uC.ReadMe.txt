@@ -5,12 +5,13 @@ License   http://www.apache.org/licenses/LICENSE-2.0
 Product   KMS-uC
 File      _DocUser/KMS-uC.ReadMe.txt
 
+1.0.5-beta 2025-11-30
 * Filter_SP
 
-1.0.3 2025-11-26
+1.0.3-beta 2025-11-26
 * Filter_FIR, Filter_IIR, Filter_MD and PID modules
 
-1.0.0 2024-10-04
+1.0.0-beta 2024-10-04
 - MC56F84565
     - GPIO
         - Configure function pin push-pull mode, pull-up/down, driver and
