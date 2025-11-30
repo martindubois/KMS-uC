@@ -5,6 +5,8 @@ License   http://www.apache.org/licenses/LICENSE-2.0
 Product   KMS-uC
 File      _DocUser/KMS-uC.ReadMe.txt
 
+* Filter_SP
+
 1.0.3 2025-11-26
 * Filter_FIR, Filter_IIR, Filter_MD and PID modules
 
