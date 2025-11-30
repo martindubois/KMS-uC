@@ -37,7 +37,7 @@ void Filter_MD_Init(Filter_MD* aThis, const Filter_MD_Table* aTable, Filter_MD_I
 
 // aThis
 // aInput_FP  (fixed point 24.8)
-inline void Filter_MD_SetInput(Filter_MD* aThis, int32_t aInput_FP)
+void Filter_MD_SetInput(Filter_MD* aThis, int32_t aInput_FP)
 {
     if (aThis->mInput_FP != aInput_FP)
     {
@@ -46,7 +46,7 @@ inline void Filter_MD_SetInput(Filter_MD* aThis, int32_t aInput_FP)
     }
 }
 
-extern void Filter_MD_Tick(Filter_MD* aThis, uint8_t aPeriod_ms)
+void Filter_MD_Tick(Filter_MD* aThis, uint8_t aPeriod_ms)
 {
     aThis->mCounter_ms += aPeriod_ms;
     if (aThis->mTable->mPeriod_ms <= aThis->mCounter_ms)
