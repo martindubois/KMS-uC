@@ -84,22 +84,23 @@ void PID_Tick(PID* aThis, uint8_t aPeriod_ms)
         aThis->mError_FP       = lError_FP;
         aThis->mIntegrator_FP += lI_FP;
 
+        if (OUTPUT_MIN_FP > aThis->mIntegrator_FP)
+        {
+            aThis->mIntegrator_FP = OUTPUT_MIN_FP;
+        }
+        else if (OUTPUT_MAX_FP < aThis->mIntegrator_FP)
+        {
+            aThis->mIntegrator_FP = OUTPUT_MAX_FP;
+        }
+
         aThis->mOutput_FP = lP_FP + aThis->mIntegrator_FP + lD_FP;
         if (OUTPUT_MIN_FP > aThis->mOutput_FP)
         {
             aThis->mOutput_FP = OUTPUT_MIN_FP;
-            if (OUTPUT_MIN_FP > aThis->mIntegrator_FP)
-            {
-                aThis->mIntegrator_FP = OUTPUT_MIN_FP;
-            }
         }
         else if (OUTPUT_MAX_FP < aThis->mOutput_FP)
         {
             aThis->mOutput_FP = OUTPUT_MAX_FP;
-            if (OUTPUT_MAX_FP < aThis->mIntegrator_FP)
-            {
-                aThis->mIntegrator_FP = OUTPUT_MAX_FP;
-            }
         }
     }
 }
