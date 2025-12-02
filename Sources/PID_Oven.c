@@ -37,7 +37,7 @@
 // Functions
 // //////////////////////////////////////////////////////////////////////////
 
-void PID_Oven_Init(PID_Oven* aThis, const PID_Oven_Table* aTable, PID_Oven_InputFunction aSetpoint, PID_Oven_InputFunction aInput)
+void PID_Oven_Init(PID_Oven* aThis, const Table* aTable, PID_Oven_InputFunction aSetpoint, PID_Oven_InputFunction aInput)
 {
     aThis->mInput    = aInput;
     aThis->mSetpoint = aSetpoint;
@@ -73,9 +73,7 @@ void PID_Oven_Tick(PID_Oven* aThis, uint8_t aPeriod_ms)
     if (aThis->mPeriod_ms <= aThis->mCounter_ms)
     {
         int32_t lSetpoint_FP = aThis->mSetpoint();
-        int32_t lIndex       = lSetpoint_FP / aThis->mTable->mStep_FP;
-        int32_t lInput_FP    = aThis->mInput   ();
-        int32_t lError_FP    = lSetpoint_FP - lInput_FP;
+        int32_t lError_FP    = lSetpoint_FP - aThis->mInput();
         int32_t lDelta_FP    = lError_FP - aThis->mError_FP;
 
         int32_t lP_FP = lError_FP * aThis->mP;
@@ -88,18 +86,8 @@ void PID_Oven_Tick(PID_Oven* aThis, uint8_t aPeriod_ms)
         aThis->mCounter_ms -= aThis->mPeriod_ms;
         aThis->mError_FP    = lError_FP;
         
-        if (0 >= lIndex)
-        {
-            lOffset_FP = aThis->mTable->mOffsets[0];
-        }
-        else if (aThis->mTable->mLength <= lIndex)
-        {
-            lOffset_FP = aThis->mTable->mOffsets[aThis->mTable->mLength - 1];
-        }
-        else
-        {
-            lOffset_FP = aThis->mTable->mOffsets[lIndex];
-        }
+        lOffset_FP = Table_GetValue(aThis->mTable, lSetpoint_FP);
+        lOffset_FP <<= 8;
 
         lPD_FP = lOffset_FP + lP_FP + lD_FP;
         if (OUTPUT_MIN_FP > lPD_FP)

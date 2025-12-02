@@ -5,9 +5,12 @@
 // Product   KMS-uC
 // File      Includes/Filter_MD.h
 
-// The filter MD (for Max Delta) is intended to filter a PID consign.
+// The filter MD (for Max Delta) is intended to filter a PID setpoint.
 
 #pragma once
+
+// ===== Includes ===========================================================
+#include "Table.h"
 
 #ifdef __cplusplus
     extern "C" {
@@ -19,36 +22,31 @@
 // Return  (fixed point 24.8)
 typedef int32_t (*Filter_MD_InputFunction)();
 
-// mEntries_Dec  (fixed point 8.8)
-// mEntries_Inc  (fixed point 8.8)
-// mStep         Distance between table entries
-// mLength       Number of table entries
-// mPeriod_ms    Time between iteration. Max. = 100 ms
+// mMaxDelta_Dec  See Table
+// mMaxDelta_Inc  See Table
+// mPeriod_ms     Time between iteration. Max. = 100 ms
 typedef struct
 {
-    const int16_t* mEntries_Dec;
-    const int16_t* mEntries_Inc;
+    const Table* mMaxDelta_Dec;
+    const Table* mMaxDelta_Inc;
 
-    int16_t mStep;
-
-    uint8_t mLength;
     uint8_t mPeriod_ms;
 }
 Filter_MD_Table;
 
 // mInput_FP    (fixed point 24.8)
 // mOutput_FP   (fixed point 24.8)
-// mActual      See Filter_MD_InputFunction
 // mTable       See Filter_MD_Table
+// mActual      See Filter_MD_InputFunction
 // mCounter_ms  Time since the last iteration
 typedef struct Filter_MD_s
 {
     int32_t mInput_FP;
     int32_t mOutput_FP;
 
-    Filter_MD_InputFunction mActual;
-
     const Filter_MD_Table* mTable;
+
+    Filter_MD_InputFunction mActual;
 
     uint8_t mCounter_ms;
 }

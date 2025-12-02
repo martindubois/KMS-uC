@@ -51,12 +51,13 @@ static void SetState_SLOPE(Filter_SP* aThis, int32_t aOutput_FP);
 // Functions
 // //////////////////////////////////////////////////////////////////////////
 
-void Filter_SP_Init(Filter_SP* aThis, Filter_SP_InputFunction aActual, int16_t aDelta_FP, int16_t aSlope_FP)
+void Filter_SP_Init(Filter_SP* aThis, const Filter_SP_Table* aTable, Filter_SP_InputFunction aActual)
 {
-    aThis->mActual = aActual;
+    aThis->mActual     = aActual;
     aThis->mCounter_ms = 0;
-    aThis->mDelta_FP = aDelta_FP;
-    aThis->mSlope_FP = aSlope_FP;
+    aThis->mDelta_FP   = 0;
+    aThis->mSlope_FP   = 0;
+    aThis->mTable      = aTable;
 
     SetState_OFF(aThis);
 }
@@ -100,11 +101,16 @@ void Filter_SP_SetInput(Filter_SP* aThis, int32_t aInput_FP)
 
         if (lSetOutput)
         {
-            int32_t lActual_FP = aThis->mActual();
+            int32_t                lActual_FP = aThis->mActual();
+            const Filter_SP_Table* lTable     = aThis->mTable;
 
             if (lActual_FP < aInput_FP)
             {
-                aThis->mOutput_FP = aInput_FP - aThis->mDelta_FP;
+                aThis->mSlope_FP = Table_GetValue(lTable->mSlopes_Inc, aInput_FP);
+
+                aThis->mDelta_FP = aThis->mSlope_FP * 10 * lTable->mDelay_s;
+
+                aThis->mOutput_FP = aInput_FP - aThis->mDelta_FP * 3 / 4;
                 if (lActual_FP > aThis->mOutput_FP)
                 {
                     SetState_SLOPE(aThis, lActual_FP);
@@ -112,7 +118,11 @@ void Filter_SP_SetInput(Filter_SP* aThis, int32_t aInput_FP)
             }
             else if (lActual_FP > aInput_FP)
             {
-                aThis->mOutput_FP = aInput_FP + aThis->mDelta_FP;
+                aThis->mSlope_FP = Table_GetValue(lTable->mSlopes_Dec, aInput_FP);
+                
+                aThis->mDelta_FP = aThis->mSlope_FP * 10 * lTable->mDelay_s;
+
+                aThis->mOutput_FP = aInput_FP + aThis->mDelta_FP * 3 / 4;
                 if (lActual_FP < aThis->mOutput_FP)
                 {
                     SetState_SLOPE(aThis, lActual_FP);

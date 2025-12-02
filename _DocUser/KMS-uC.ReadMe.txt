@@ -5,6 +5,9 @@ License   http://www.apache.org/licenses/LICENSE-2.0
 Product   KMS-uC
 File      _DocUser/KMS-uC.ReadMe.txt
 
+1.0.6-beta 2025-12-02
+* Table
+
 1.0.5-beta 2025-11-30
 * Filter_SP
 

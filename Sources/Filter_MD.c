@@ -48,52 +48,36 @@ void Filter_MD_SetInput(Filter_MD* aThis, int32_t aInput_FP)
 
 void Filter_MD_Tick(Filter_MD* aThis, uint8_t aPeriod_ms)
 {
+    const Filter_MD_Table* lTable = aThis->mTable;
+
     aThis->mCounter_ms += aPeriod_ms;
-    if (aThis->mTable->mPeriod_ms <= aThis->mCounter_ms)
+    if (lTable->mPeriod_ms <= aThis->mCounter_ms)
     {
-        int32_t lActual_FP = aThis->mActual();
-        int16_t lOutput = (int16_t)(aThis->mOutput_FP >> 8);
+        int32_t lInput_FP  = aThis->mInput_FP;
+        int32_t lOutput_FP = aThis->mOutput_FP;
 
-        aThis->mCounter_ms -= aThis->mTable->mPeriod_ms;
+        aThis->mCounter_ms -= lTable->mPeriod_ms;
 
-        if (0 <= lOutput)
+        if (0 <= lOutput_FP)
         {
-            int16_t lIndex = lOutput / aThis->mTable->mStep;
-            if (aThis->mTable->mLength > lIndex)
+            int32_t lDelta_FP;
+            int16_t lMax_FP;
+
+            if (lInput_FP > lOutput_FP)
             {
-                int32_t lDelta_FP;
-                int16_t lMax_FP;
+                // Inc.
+                lDelta_FP = lInput_FP - lOutput_FP;
+                lMax_FP   = Table_GetValue(lTable->mMaxDelta_Inc, lOutput_FP);
 
-                if (aThis->mInput_FP > aThis->mOutput_FP)
-                {
-                    // Inc.
-                    lDelta_FP = aThis->mInput_FP - aThis->mOutput_FP;
-                    lMax_FP   = aThis->mTable->mEntries_Inc[lIndex];
+                aThis->mOutput_FP = lOutput_FP + ((lDelta_FP <= lMax_FP) ? lDelta_FP : lMax_FP);
+            }
+            else if (lInput_FP < lOutput_FP)
+            {
+                // Dec.
+                lDelta_FP = lOutput_FP - lInput_FP;
+                lMax_FP   = Table_GetValue(lTable->mMaxDelta_Dec, lOutput_FP);
 
-                    if (lDelta_FP <= lMax_FP)
-                    {
-                        aThis->mOutput_FP += lDelta_FP;
-                    }
-                    else
-                    {
-                        aThis->mOutput_FP += lMax_FP;
-                    }
-                }
-                else if (aThis->mInput_FP < aThis->mOutput_FP)
-                {
-                    // Dec.
-                    lDelta_FP = aThis->mOutput_FP - aThis->mInput_FP;
-                    lMax_FP   = aThis->mTable->mEntries_Dec[lIndex];
-
-                    if (lDelta_FP <= lMax_FP)
-                    {
-                        aThis->mOutput_FP -= lDelta_FP;
-                    }
-                    else
-                    {
-                        aThis->mOutput_FP -= lMax_FP;
-                    }
-                }
+                aThis->mOutput_FP = lOutput_FP - ((lDelta_FP <= lMax_FP) ? lDelta_FP : lMax_FP);
             }
         }
     }
