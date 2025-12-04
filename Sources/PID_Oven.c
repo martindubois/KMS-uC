@@ -21,7 +21,6 @@
 #include <stdint.h>
 
 // ===== Includes ===========================================================
-#include "Filter_FIR.h"
 #include "Filter_MD.h"
 
 #include "PID_Oven.h"
@@ -62,7 +61,7 @@ void PID_Oven_SetParams(PID_Oven* aThis, int32_t aP, int32_t aI, int32_t aD)
 void PID_Oven_Reset(PID_Oven* aThis)
 {
     aThis->mCounter_ms    = 0;
-    aThis->mError_FP      = 0;
+    aThis->mError_C_FP    = 0;
     aThis->mIntegrator_FP = 0;
     aThis->mOutput_FP     = 0;
 }
@@ -74,7 +73,7 @@ void PID_Oven_Tick(PID_Oven* aThis, uint8_t aPeriod_ms)
     {
         int32_t lSetpoint_FP = aThis->mSetpoint();
         int32_t lError_FP    = lSetpoint_FP - aThis->mInput();
-        int32_t lDelta_FP    = lError_FP - aThis->mError_FP;
+        int32_t lDelta_FP    = lError_FP - aThis->mError_C_FP;
 
         int32_t lP_FP = lError_FP * aThis->mP;
         int32_t lI_FP = lError_FP * aThis->mI;
@@ -84,7 +83,7 @@ void PID_Oven_Tick(PID_Oven* aThis, uint8_t aPeriod_ms)
         int32_t lPD_FP;
 
         aThis->mCounter_ms -= aThis->mPeriod_ms;
-        aThis->mError_FP    = lError_FP;
+        aThis->mError_C_FP    = lError_FP;
         
         lOffset_FP = Table_GetValue(aThis->mTable, lSetpoint_FP);
         lOffset_FP <<= 8;

@@ -23,7 +23,7 @@ typedef int32_t (*PID_Oven_InputFunction)();
 // mP              Gain Proportional
 // mI              Gain Integrator
 // mD              Gain Derivative
-// mError_FP       (fixed point 24.8)
+// mError_C_FP     (fixed point 24.8)
 // mIntegrator_FP  (fixed point 24.8)
 // mOutput_FP      (fixed point 24.8)
 // mInput
@@ -36,7 +36,7 @@ typedef struct
     int32_t mI;
     int32_t mD;
 
-    int32_t mError_FP;
+    int32_t mError_C_FP;
     int32_t mIntegrator_FP;
     int32_t mOutput_FP;
 
