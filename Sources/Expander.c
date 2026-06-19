@@ -87,6 +87,10 @@ ConfigOp;
 
 #define PORT_QTY (2)
 
+#define TIMEOUT_DISABLED (0)
+
+#define TIMEOUT_MS (500)
+
 #define VERIFY_AGE_MAX_ms (1000)
 
 // Variables
@@ -106,7 +110,7 @@ static I2C_Device sDevice;
 static uint8_t sInput        [PORT_QTY];
 static uint8_t sInput_Default[PORT_QTY];
 static uint8_t sOutput       [PORT_QTY];
-static uint8_t sVerify       [PORT_QTY];
+static uint8_t sVerify       [PORT_QTY] = { 0xff, 0xff };
 
 static uint16_t sVerifyAge_ms;
 
@@ -119,6 +123,8 @@ static Expander_Callback sOnOperationCompleted;
 static State sState = STATE_I2C_NEEDED;
 
 static uint16_t sStats[STATE_QTY];
+
+static unsigned int sTimeout_ms;
 
 static const ConfigOp CONFIG_OPS[] =
 {
@@ -137,7 +143,7 @@ static const ConfigOp CONFIG_OPS[] =
 // Interrupt  Read / Write
 // Tick       Read / Write
 // Protected using GPIO_Interrupt_Disable and GPIO_Interrupt_Enable
-static uint8_t sFlags_Waiting;
+static uint8_t sFlags_Waiting = FLAG_CONFIG;
 
 // Static function declarations
 // //////////////////////////////////////////////////////////////////////////
@@ -152,6 +158,7 @@ static void OnVerifyChanged();
 static void SetState(State aState);
 
 static void SetState_CONFIG     ();
+static void SetState_I2C_NEEDED ();
 static void SetState_I2C_PENDING(Expander_Callback aOnCompletion);
 static void SetState_INPUT      ();
 static void SetState_RESET      ();
@@ -338,6 +345,20 @@ void Expander_Tick(uint16_t aPeriod_ms)
 {
     // assert(0 < aPeriod_ms);
 
+    // assert(TIMEOUT_ms >= sTimeout_ms);
+
+    if (TIMEOUT_DISABLED < sTimeout_ms)
+    {
+        if (sTimeout_ms > aPeriod_ms)
+        {
+            sTimeout_ms -= aPeriod_ms;
+        }
+        else
+        {
+            SetState_RESET();
+        }
+    }
+
     sVerifyAge_ms += aPeriod_ms;
 
     switch (sState)
@@ -386,7 +407,7 @@ void OnVerifyChanged()
 
     for (i = 0; i < PORT_QTY; i++)
     {
-        if (sConfig_InterruptMask[i] != sVerify[i])
+        if (sOutput[i] != sVerify[i])
         {
             SetState_RESET();
             break;
@@ -411,6 +432,13 @@ void SetState_CONFIG()
     SetState(STATE_CONFIG);
 }
 
+void SetState_I2C_NEEDED()
+{
+    SetState(STATE_I2C_NEEDED);
+
+    sTimeout_ms = TIMEOUT_ms;
+}
+
 void SetState_I2C_PENDING(Expander_Callback aOnCompletion)
 {
     sOnOperationCompleted = aOnCompletion;
@@ -427,9 +455,13 @@ void SetState_INPUT()
 
 void SetState_RESET()
 {
+    // assert(TIMEOUT_ms >= sTimeout_ms);
+
     GPIO_Output(sReset, 0);
 
     SetState(STATE_RESET);
+
+    sTimeout_ms = TIMEOUT_DISABLED;
 
     CopyDefaultInput();
 
@@ -443,7 +475,7 @@ void SetState_VERIFY()
 {
     // assert(0 < sVerifyAge_ms);
 
-    I2C_Device_Write(sDevice, 0x4a, NULL, 0);
+    I2C_Device_Write(sDevice, 0x02, NULL, 0);
 
     SetState(STATE_VERIFY);
 
@@ -476,8 +508,13 @@ void Tick_CONFIG(uint16_t aPeriod_ms)
 
 void Tick_I2C_NEEDED()
 {
-    if (I2C_Device_Idle(sDevice))
+    assert(TIMEOUT_DISABLED < sTimeout_ms);
+    assert(TIMEOUT_ms >= sTimeout_ms);
+
+    if (I2C_Device_Idle(sDevice) || I2C_Device_Error(sDevice))
     {
+        sTimeout_ms = TIMEOUT_DISABLED;
+
         if ((0 == sFlags_Waiting) || (VERIFY_AGE_MAX_ms <= sVerifyAge_ms))
         {
             SetState_VERIFY();
@@ -486,6 +523,9 @@ void Tick_I2C_NEEDED()
         {
             uint8_t lFlags_Running = 0;
 
+            // Configuration is the absolute priority. If the expander is not
+            // configured, output signals do not reach pins and input values
+            // can be wrong.
             if (0 != (sFlags_Waiting & FLAG_CONFIG))
             {
                 lFlags_Running = FLAG_CONFIG;
@@ -493,6 +533,8 @@ void Tick_I2C_NEEDED()
             }
             else
             {
+                // We use toggle to give fear chance to both types of
+                // operation
                 static uint8_t sToggle;
 
                 if (sToggle)
@@ -544,7 +586,7 @@ void Tick_I2C_PENDING(uint16_t aPeriod_ms)
     case I2C_PENDING: break;
 
     case I2C_SUCCESS:
-        SetState(STATE_I2C_NEEDED);
+        SetState_I2C_NEEDED();
 
         if (NULL != sOnOperationCompleted)
         {
@@ -582,7 +624,7 @@ void Tick_RESET()
 {
     GPIO_Output(sReset, 1);
 
-    SetState(STATE_I2C_NEEDED);
+    SetState_I2C_NEEDED();
 
     AddFlags(FLAG_CONFIG);
 }
