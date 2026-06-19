@@ -1,9 +1,9 @@
 
 // Author    KMS - Martin Dubois, P. Eng.
-// Copyright (C) 2024 KMS
+// Copyright (C) 2024-2026 KMS
 // License   http://www.apache.org/licenses/LICENSE-2.0
 // Product   KMS-uC
-// File      Tests/MC56F/MC56F85565/Sources/Test.h
+// File      Tests/MC56F/MC56F85565/Sources/Test.c
 
 // ==== C ===================================================================
 #include <stdint.h>
@@ -26,14 +26,16 @@
 // Configuration
 // //////////////////////////////////////////////////////////////////////////
 
-#define _BOARD_NK_E1_CTRL_
+// #define _BOARD_NK_E1_CTRL_
+#define _BOARD_NK_E3_CTRL_
 // #define _BOARD_UNKNOWN_
 
 // #define _TEST_ADC12_
+#define _TEST_I2C_
 // #define _TEST_MODBUS_SLAVE_
 // #define _TEST_PWMA_
 // #define _TEST_EEPROM_
-#define _TEST_EXPANDER_
+// #define _TEST_EXPANDER_
 
 // Variables
 // //////////////////////////////////////////////////////////////////////////
@@ -108,7 +110,6 @@ void Test_Init0()
     EXPANDER_RESET.mPushPull = 1;
 
     MODBUS_OUTPUT_ENABLE.mBit      = 9;
-    MODBUS_OUTPUT_ENABLE.mPort     = GPIO_PORT_A;
     MODBUS_OUTPUT_ENABLE.mPushPull = 1;
 
     MODBUS_RX.mBit  = 8;
@@ -135,6 +136,15 @@ void Test_Init0()
         PWMA_0_A            .mPort = GPIO_PORT_E;
     #endif
 
+    #ifdef _BOARD_NK_E3_CTRL_
+        EEPROM_WRITE_PROTECT.mPort = GPIO_PORT_C;
+        EXPANDER_INT        .mPort = GPIO_PORT_C;
+        EXPANDER_RESET      .mPort = GPIO_PORT_F;
+        MODBUS_OUTPUT_ENABLE.mPort = GPIO_PORT_C;
+        MODBUS_TX           .mPort = GPIO_PORT_C;
+        PWMA_0_A            .mPort = GPIO_PORT_E;
+    #endif
+
     #ifdef _BOARD_UNKNOWN_
         EEPROM_WRITE_PROTECT.mPort = GPIO_PORT_DUMMY;
         EXPANDER_INT        .mPort = GPIO_PORT_DUMMY;
@@ -151,6 +161,11 @@ void Test_Main()
 {
     static uint8_t sBuffers[EEPROM_QTY][4];
     static EEPROM  sEEPROMs[EEPROM_QTY];
+
+    static uint8_t    sI2C_Cmd[8];
+    static I2C_Device sI2C_Device;
+
+    uint32_t lTime_ms = 0;
 
     unsigned int i;
 
@@ -183,6 +198,20 @@ void Test_Main()
     #ifdef _TEST_EXPANDER_
 
         Expander_Init(1, 0x40, EXPANDER_RESET, EXPANDER_DEFAULT_INPUT, EXPANDER_INT, NULL);
+
+        I2C_Init(1);
+
+    #endif
+
+    #ifdef _TEST_I2C_
+
+        sI2C_Cmd[0] = 1;
+        sI2C_Cmd[1] = 128;
+        sI2C_Cmd[2] = 128;
+        sI2C_Cmd[3] = 128;
+        sI2C_Cmd[4] = 42;
+
+        I2C_Device_Init(&sI2C_Device, 1, 0);
 
         I2C_Init(1);
 
@@ -236,6 +265,8 @@ void Test_Main()
         lPeriod_ms = Tick_Work();
         if (0 < lPeriod_ms)
         {
+            lTime_ms += lPeriod_ms;
+
             #ifdef _TEST_EEPROM_
                 for (i = 0; i < 1; i++)
                 {
@@ -258,6 +289,17 @@ void Test_Main()
 
             #ifdef _TEST_EXPANDER_
                 Expander_Tick(lPeriod_ms);
+            #endif
+
+            #ifdef _TEST_I2C_
+                I2C_Device_Tick(sI2C_Device, lPeriod_ms);
+                if (0 == lTime_ms % 100)
+                {
+                    sI2C_Cmd[1]--;
+                    sI2C_Cmd[3]++;
+
+                    I2C_Device_Write(sI2C_Device, 0xa0, sI2C_Cmd, sizeof(sI2C_Cmd));
+                }
             #endif
 
             #ifdef _TEST_MODBUS_SLAVE_
