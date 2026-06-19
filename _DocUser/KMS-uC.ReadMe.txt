@@ -7,12 +7,13 @@ File      _DocUser/KMS-uC.ReadMe.txt
 
 1.0.6-beta 2025-12-02
 * Table
+* PID_Oven
 
 1.0.5-beta 2025-11-30
 * Filter_SP
 
 1.0.3-beta 2025-11-26
-* Filter_FIR, Filter_IIR, Filter_MD and PID modules
+* Filter_IIR, Filter_MD and PID modules
 
 1.0.0-beta 2024-10-04
 - MC56F84565
