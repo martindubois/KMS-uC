@@ -55,11 +55,6 @@
 			<locationURI>PARENT-3-PROJECT_LOC/Sources/Expander.c</locationURI>
 		</link>
 		<link>
-			<name>Common/Filter_FIR.c</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/Sources/Filter_FIR.c</locationURI>
-		</link>
-		<link>
 			<name>Common/Filter_IIR.c</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/Sources/Filter_IIR.c</locationURI>

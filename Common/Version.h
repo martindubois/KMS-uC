@@ -1,6 +1,6 @@
 
 // Author    KMS - Martin Dubois, P. Eng.
-// Copyright (C) 2025 KMS
+// Copyright (C) 2025-2026 KMS
 // License   http://www.apache.org/licenses/LICENSE-2.0
 // Product   KMS-uC
 // File      Common/Version.h
@@ -17,8 +17,8 @@
 // Constantes
 /////////////////////////////////////////////////////////////////////////////
 
-#define VERSION_RC   1,0,7,0
-#define VERSION_STR  "1.0.7.0"
+#define VERSION_RC   1,0,8,0
+#define VERSION_STR  "1.0.8.0"
 
 #ifdef __cplusplus
     KMS_VERSION("")

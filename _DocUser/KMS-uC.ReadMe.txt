@@ -5,6 +5,9 @@ License   http://www.apache.org/licenses/LICENSE-2.0
 Product   KMS-uC
 File      _DocUser/KMS-uC.ReadMe.txt
 
+* GPIO_Output_Get
+- Thermocouple_TYPE_R
+
 1.0.7 2026-06-19
 
 1.0.6-beta 2025-12-02

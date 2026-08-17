@@ -1,6 +1,6 @@
 
 // Author    KMS - Martin Dubois, P. Eng.
-// Copyright (C) 2025 KMS
+// Copyright (C) 2025-2026 KMS
 // License   http://www.apache.org/licenses/LICENSE-2.0
 // Product   KMS-uC
 // File      Sources/PID.c
@@ -21,7 +21,6 @@
 #include <stdint.h>
 
 // ===== Includes ===========================================================
-#include "Filter_FIR.h"
 #include "Filter_MD.h"
 
 #include "PID.h"

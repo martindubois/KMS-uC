@@ -1,6 +1,6 @@
 
 // Author    KMS - Martin Dubois, P. Eng.
-// Copyright (C) 2024 KMS
+// Copyright (C) 2024-2026 KMS
 // License   http://www.apache.org/licenses/LICENSE-2.0
 // Product   KMS-uC
 // File      Sources/MC56F/GPIO.c
@@ -255,6 +255,26 @@ void GPIO_Output(GPIO aDesc, uint8_t aVal)
             lR->mData &= ~ lB;
         }
     }
+}
+
+uint8_t GPIO_Output_Get(GPIO aDesc)
+{
+    // assert(BIT_PER_PORT > aDesc.mBit);
+
+    uint8_t lResult = 0;
+
+    if (GPIO_PORT_DUMMY > aDesc.mPort)
+    {
+        uint16_t           lB;
+        volatile PortRegs* lR;
+
+        lB = 1 << aDesc.mBit;
+        lR = PORT_REGS + aDesc.mPort;
+
+        lResult = (0 != (lR->mData & lB)) ? 1 : 0;
+    }
+
+    return lResult;
 }
 
 // Static function declarations

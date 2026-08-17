@@ -1,0 +1,17 @@
+
+## Author    KMS - Martin Dubois, P. Eng.
+## Copyright (C) 2026 KMS
+## Lisense   http://www.apache.org/licenses/LICENSE-2.0
+## Product   KMS-uC
+## File      DoxyFile_en.txt
+
+ENABLED_SECTIONS     = en
+GENERATE_LATEX       = NO
+HAVE_DOT             = NO
+HIDE_UNDOC_MEMBERS   = YES
+INPUT                = Includes
+OUTPUT_DIRECTORY     = doxygen_en
+OUTPUT_LANGUAGE      = English
+PROJECT_NAME         = "KMS-uC"
+SEARCHENGINE         = NO
+TYPEDEF_HIDES_STRUCT = YES

@@ -1,6 +1,6 @@
 
 // Author    KMS - Martin Dubois, P. Eng.
-// Copyright (C) 2024 KMS
+// Copyright (C) 2024-2026 KMS
 // License   http://www.apache.org/licenses/LICENSE-2.0
 // Product   KMS-uC
 // File      Sources/Expander.c
@@ -89,7 +89,7 @@ ConfigOp;
 
 #define TIMEOUT_DISABLED (0)
 
-#define TIMEOUT_MS (500)
+#define TIMEOUT_ms (500)
 
 #define VERIFY_AGE_MAX_ms (1000)
 
@@ -508,11 +508,13 @@ void Tick_CONFIG(uint16_t aPeriod_ms)
 
 void Tick_I2C_NEEDED()
 {
-    assert(TIMEOUT_DISABLED < sTimeout_ms);
-    assert(TIMEOUT_ms >= sTimeout_ms);
+    // assert(TIMEOUT_DISABLED < sTimeout_ms);
+    // assert(TIMEOUT_ms >= sTimeout_ms);
 
-    if (I2C_Device_Idle(sDevice) || I2C_Device_Error(sDevice))
+    switch (I2C_Device_Status(sDevice))
     {
+    case I2C_ERROR:
+    case I2C_SUCCESS:
         sTimeout_ms = TIMEOUT_DISABLED;
 
         if ((0 == sFlags_Waiting) || (VERIFY_AGE_MAX_ms <= sVerifyAge_ms))
@@ -571,6 +573,11 @@ void Tick_I2C_NEEDED()
                 GPIO_Interrupt_Enable(sInt);
             }
         }
+        break;
+
+    case I2C_PENDING: break;
+
+    // default: assert(false);
     }
 }
 

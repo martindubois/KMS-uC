@@ -1,15 +1,18 @@
 
-// Author    KMS - Martin Dubois, P. Eng.
-// Copyright (C) 2024 KMS
-// License   http://www.apache.org/licenses/LICENSE-2.0
 // Product   KMS-uC
-// File      Includes/Thermocouple.h
+// License   http://www.apache.org/licenses/LICENSE-2.0
+
+/// \author    KMS - Martin Dubois, P. Eng.
+/// \copyright Copyright &copy; 2024-2026 KMS
+/// \file      Includes/Thermocouple.h
+/// \brief     Functions to convert thermocouple reading
 
 #pragma once
 
 // Data types
 // //////////////////////////////////////////////////////////////////////////
 
+/// \brief Temperature conversion table
 typedef struct
 {
     int16_t mBegin_C;
@@ -22,6 +25,7 @@ typedef struct
 }
 Thermocouple_Table;
 
+/// \brief Thermocouple type description
 typedef struct
 {
     const Thermocouple_Table* mTable;
@@ -29,6 +33,7 @@ typedef struct
 }
 Thermocouple_Type;
 
+/// \brief Thermocouple description
 typedef struct
 {
     int16_t mCal_Offset_uV;
@@ -40,16 +45,30 @@ Thermocouple;
 // Constants
 // //////////////////////////////////////////////////////////////////////////
 
-extern const Thermocouple_Type THERMOCOUPLE_TYPE_R;
+/// \brief Thermocouple type R
+extern const Thermocouple_Type Thermocouple_TYPE_R;
 
 // Functions
 // //////////////////////////////////////////////////////////////////////////
 
-// aType  THERMOCOUPLE_TYPE_R
+/// \brief Initialize a Thermocouple instance
+/// \param aInit The instance to inisialize
+/// \param aType Thermocouple_TYPE_...
+/// \see Thermocouple_Calibrate Thermocouple_TYPE_R Thermocouple_uB_to_C
 extern void Thermocouple_Init(Thermocouple* aThis, const Thermocouple_Type* aType);
 
-// Return  false
-//         true
+/// \brief Convert uV value in temperature
+/// \param aThis     The Thermocouple instance
+/// \param aTempCJ_C Temperature at the cold junction
+/// \param aIn_uV    The read value
+/// \param aOut_C    The function put the temperature there
+/// \retval false
+/// \retval true
+/// \see Thermocouple_Init
 extern uint8_t Thermocouple_uV_to_C(const Thermocouple* aThis, int16_t aTempCJ_C, int32_t aIn_uV, int16_t* aOut_C);
 
+/// \brief Modify the calibration
+/// \param aThis   The instance
+/// \param aRead_C The indicated temperature
+/// \param aReal_C The real temperature
 extern void Thermocouple_Calibrate(Thermocouple* aThis, int16_t aRead_C, int16_t aReal_C);
