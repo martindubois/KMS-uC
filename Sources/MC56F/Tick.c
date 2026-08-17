@@ -82,10 +82,10 @@ void Tick_Init(uint32_t aClock_Hz)
 
     *SIM_PCE2 |= SIM_PCE2_PIT1;
 
-    PIT1_REGS->mControl = lPrescaler << 3;
-    PIT1_REGS->mModulo  = lCount;
+    PIT1_REGS->mControl = (uint16_t)(lPrescaler << 3);
+    PIT1_REGS->mModulo  = (uint16_t) lCount;
 
-    PIT1_REGS->mControl = (lPrescaler << 3) | PIT_CTRL_CNT_EN;
+    PIT1_REGS->mControl = (uint16_t)(lPrescaler << 3) | PIT_CTRL_CNT_EN;
 }
 
 uint16_t Tick_Work()

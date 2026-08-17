@@ -96,12 +96,12 @@ static void ConfigWriteProtect(GPIO* aWP);
 
 static void SetState_ERROR(EEPROM* aThis);
 
-static void Start_AddressState(EEPROM* aThis, unsigned int aNextState);
-static void Start_ReadState   (EEPROM* aThis, unsigned int aNextState);
-static void Start_WriteState  (EEPROM* aThis, unsigned int aNextState);
-static void Start_WaitState   (EEPROM* aThis, unsigned int aNextState);
+static void Start_AddressState(EEPROM* aThis, uint8_t aNextState);
+static void Start_ReadState   (EEPROM* aThis, uint8_t aNextState);
+static void Start_WriteState  (EEPROM* aThis, uint8_t aNextState);
+static void Start_WaitState   (EEPROM* aThis, uint8_t aNextState);
 
-static void Work_WriteState(EEPROM* aThis, unsigned int aNextState);
+static void Work_WriteState(EEPROM* aThis, uint8_t aNextState);
 
 static void Work_ERASE_VERIFY_ADDR(EEPROM* aThis);
 static void Work_ERASE_VERIFY_DATA(EEPROM* aThis);
@@ -135,7 +135,7 @@ void EEPROM_Init(EEPROM* aThis, uint8_t aBusIndex, uint8_t aDeviceAddress, GPIO 
     ConfigWriteProtect(&aThis->mWriteProtect);
 }
 
-void EEPROM_Erase(EEPROM* aThis, uint16_t aAddress, uint16_t aSize_byte)
+void EEPROM_Erase(EEPROM* aThis, uint8_t aAddress, uint16_t aSize_byte)
 {
     // assert(0 < aSize_byte);
 
@@ -150,7 +150,7 @@ void EEPROM_Erase(EEPROM* aThis, uint16_t aAddress, uint16_t aSize_byte)
     Start_WriteState(aThis, STATE_ERASE);
 }
 
-void EEPROM_Erase_Verify(EEPROM* aThis, uint16_t aAddress, uint16_t aSize_byte)
+void EEPROM_Erase_Verify(EEPROM* aThis, uint8_t aAddress, uint16_t aSize_byte)
 {
     // assert(0 < aSize_byte);
 
@@ -162,7 +162,7 @@ void EEPROM_Erase_Verify(EEPROM* aThis, uint16_t aAddress, uint16_t aSize_byte)
 
 uint8_t EEPROM_Idle(EEPROM* aThis) { return STATE_IDLE == aThis->mState; }
 
-void EEPROM_Read(EEPROM* aThis, uint16_t aAddress, void* aOut, uint16_t aOutSize_byte)
+void EEPROM_Read(EEPROM* aThis, uint8_t aAddress, void* aOut, uint16_t aOutSize_byte)
 {
     // assert(NULL != aOut);
     // assert(0 < aOutSize_byte);
@@ -207,7 +207,7 @@ uint8_t EEPROM_Status(EEPROM* aThis)
     return lResult;
 }
 
-void EEPROM_Verify(EEPROM* aThis, uint16_t aAddress, const void* aIn, uint16_t aInSize_byte)
+void EEPROM_Verify(EEPROM* aThis, uint8_t aAddress, const void* aIn, uint16_t aInSize_byte)
 {
     // assert(NULL != aIn);
     // assert(0 < aInSize_byte);
@@ -219,7 +219,7 @@ void EEPROM_Verify(EEPROM* aThis, uint16_t aAddress, const void* aIn, uint16_t a
     Start_AddressState(aThis, STATE_VERIFY_ADDR);
 }
 
-void EEPROM_Write(EEPROM* aThis, uint16_t aAddress, const void* aIn, uint16_t aInSize_byte)
+void EEPROM_Write(EEPROM* aThis, uint8_t aAddress, const void* aIn, uint16_t aInSize_byte)
 {
     // assert(NULL != aIn);
     // assert(0 < aInSize_byte);
@@ -321,7 +321,7 @@ void SetState_ERROR(EEPROM* aThis)
     aThis->mState = STATE_ERROR;
 }
 
-void Start_AddressState(EEPROM* aThis, unsigned int aNextState)
+void Start_AddressState(EEPROM* aThis, uint8_t aNextState)
 {
     // assert((STATE_ERASE_VERIFY_ADDR == aNextState) || (STATE_READ_ADDR == aNextState) || (STATE_VERIFY_ADDR == aNextState));
 
@@ -331,7 +331,7 @@ void Start_AddressState(EEPROM* aThis, unsigned int aNextState)
     aThis->mState = aNextState;
 }
 
-void Start_ReadState(EEPROM* aThis, unsigned int aNextState)
+void Start_ReadState(EEPROM* aThis, uint8_t aNextState)
 {
     // assert((STATE_ERASE_VERIFY_DATA == aNextState) || (STATE_READ_DATA == aNextState) || (STATE_VERIFY_DATA == aNextState));
 
@@ -344,11 +344,11 @@ void Start_ReadState(EEPROM* aThis, unsigned int aNextState)
         aThis->mReadSize_byte = READ_MAX_byte;
     }
 
-    I2C_Device_Read(aThis->mDevice, aThis->mDataPtr, aThis->mReadSize_byte);
+    I2C_Device_Read(aThis->mDevice, aThis->mDataPtr, (uint8_t)aThis->mReadSize_byte);
     aThis->mState = aNextState;
 }
 
-void Start_WriteState(EEPROM* aThis, unsigned int aNextState)
+void Start_WriteState(EEPROM* aThis, uint8_t aNextState)
 {
     // assert((STATE_ERASE == aNextState) || STATE_WRITE == aNextState);
 
@@ -361,7 +361,7 @@ void Start_WriteState(EEPROM* aThis, unsigned int aNextState)
         lSize_byte = WRITE_MAX_byte;
     }
 
-    I2C_Device_Write(aThis->mDevice, aThis->mAddress, aThis->mDataPtr, lSize_byte);
+    I2C_Device_Write(aThis->mDevice, aThis->mAddress, aThis->mDataPtr, (uint8_t)lSize_byte);
 
     aThis->mAddress       += lSize_byte;
     aThis->mDataPtr       += lSize_byte;
@@ -369,7 +369,7 @@ void Start_WriteState(EEPROM* aThis, unsigned int aNextState)
     aThis->mState          = aNextState;
 }
 
-void Start_WaitState(EEPROM* aThis, unsigned int aNextState)
+void Start_WaitState(EEPROM* aThis, uint8_t aNextState)
 {
     // assert((STATE_ERASE_WAIT == aNextState) || (STATE_WRITE_WAIT == aNextState));
 
@@ -381,7 +381,7 @@ void Start_WaitState(EEPROM* aThis, unsigned int aNextState)
     aThis->mTimeout_ms = TIMEOUT_ms;
 }
 
-void Work_WriteState(EEPROM* aThis, unsigned int aNextState)
+void Work_WriteState(EEPROM* aThis, uint8_t aNextState)
 {
     // assert((STATE_ERASE_WAIT == aNextState) || (STATE_WRITE_WAIT == aNextState));
 

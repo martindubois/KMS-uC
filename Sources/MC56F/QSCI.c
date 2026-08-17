@@ -389,7 +389,7 @@ void UART_Write(uint8_t aIndex, const void* aIn, uint8_t aInSize_byte)
         Start_Z0(lThisW, (void*) aIn, aInSize_byte);
 
         lThisW->mState      = STATE_TX;
-        lThisW->mTimeout_ms = WRITE_TIMEOUT_ms_byte * aInSize_byte;
+        lThisW->mTimeout_ms = (uint16_t)(WRITE_TIMEOUT_ms_byte * aInSize_byte);
 
         lR->mCtrl1 |= 0x8; // TE
 
@@ -520,7 +520,7 @@ void Receive_Z0(Context* aThis)
 
         for (i = 0; i < lCtrl2; i++)
         {
-            uint8_t lData = lR->mData;
+            uint8_t lData = (uint8_t)lR->mData;
 
             if (NULL == lThisR->mInOut)
             {

@@ -134,7 +134,7 @@ void Modbus_Slave_Init(uint8_t aUART, uint8_t aDevice, Modbus_Slave_Range* aRang
     GPIO_Output(sOutputEnable, 0);
 }
 
-uint8_t Modbus_Slave_Callback_Default(struct Modbus_Slave_Range_s* aRange, uint16_t aAddress, uint8_t aCount, uint16_t* aData)
+uint8_t Modbus_Slave_Callback_Default(struct Modbus_Slave_Range_s* aRange, uint16_t aAddress, uint16_t aCount, uint16_t* aData)
 {
     // assert(NULL != aRange);
     // assert(0 < aCount);
@@ -143,7 +143,7 @@ uint8_t Modbus_Slave_Callback_Default(struct Modbus_Slave_Range_s* aRange, uint1
     return MODBUS_NO_ERROR;
 }
 
-uint8_t Modbus_Slave_Callback_Error(struct Modbus_Slave_Range_s* aRange, uint16_t aAddress, uint8_t aCount, uint16_t* aData)
+uint8_t Modbus_Slave_Callback_Error(struct Modbus_Slave_Range_s* aRange, uint16_t aAddress, uint16_t aCount, uint16_t* aData)
 {
     // assert(NULL != aRange);
     // assert(0 < aCount);
@@ -228,13 +228,15 @@ uint8_t Execute_READ_REGISTERS(uint16_t aAddr, uint16_t aCount)
         {
             lResult_byte = 1 + 1; // Device, Function
 
-            sBuffer[lResult_byte] = sizeof(uint16_t) * aCount;
+            // TODO  Validate aCount value
+
+            sBuffer[lResult_byte] = sizeof(uint16_t) * (uint8_t)aCount;
             lResult_byte++;
 
             for (i = 0; i < aCount; i++)
             {
-                uint8_t lHigh = sData[i] >> 8;
-                uint8_t lLow  = sData[i];
+                uint8_t lHigh = (uint8_t)(sData[i] >> 8);
+                uint8_t lLow  = (uint8_t) sData[i];
 
                 sBuffer[lResult_byte    ] = lHigh;
                 sBuffer[lResult_byte + 1] = lLow;
@@ -268,13 +270,15 @@ uint8_t Execute_WRITE_MULTIPLE_REGISTERS(uint16_t aAddr, uint16_t aCount)
     {
         uint8_t  lByte  = 7;
         uint16_t lIndex = aAddr - lRange->mAddress;
-        int      lRet   = 0;
+        uint8_t  lRet   = 0;
 
         uint8_t i;
 
         for (i = 0; i < aCount; i++)
         {
-            sData[i] = (sBuffer[lByte] << 8) | sBuffer[lByte + 1];
+            sData[i] = sBuffer[lByte];
+            sData[i] <<= 8;
+            sData[i] |= sBuffer[lByte + 1];
 
             lByte += sizeof(uint16_t);
         }
@@ -335,8 +339,8 @@ uint8_t Execute_WRITE_SINGLE_REGISTER(uint16_t aAddr, uint16_t aValue)
             lRet = lRange->mAfterWrite(lRange, aAddr, 1, sData);
             if (0 == lRet)
             {
-                uint8_t lHigh = sData[0] >> 8;
-                uint8_t lLow  = sData[0];
+                uint8_t lHigh = (uint8_t)(sData[0] >> 8);
+                uint8_t lLow  = (uint8_t) sData[0];
 
                 sBuffer[4] = lHigh;
                 sBuffer[5] = lHigh;
@@ -454,8 +458,14 @@ void ParseRequest()
 // Device 0x04 AddrH AddrL CountH CountL
 uint8_t Parse_READ_REGISTERS()
 {
-    uint16_t lAddr  = (sBuffer[2] << 8) | sBuffer[3];
-    uint16_t lCount = (sBuffer[4] << 8) | sBuffer[5];
+    uint16_t lAddr  = sBuffer[2];
+    uint16_t lCount = sBuffer[4];
+
+    lAddr  <<= 8;
+    lAddr |= sBuffer[3];
+
+    lCount <<= 8;
+    lCount |= sBuffer[5];
 
     return Execute_READ_REGISTERS(lAddr, lCount);
 }
@@ -463,8 +473,14 @@ uint8_t Parse_READ_REGISTERS()
 // Device 0x10 AddrH AddrL CountH CountL ByteCount ...
 uint8_t Parse_WRITE_MULTIPLE_REGISTERS()
 {
-    uint16_t lAddr  = (sBuffer[2] << 8) | sBuffer[3];
-    uint16_t lCount = (sBuffer[4] << 8) | sBuffer[5];
+    uint16_t lAddr  = sBuffer[2];
+    uint16_t lCount = sBuffer[4];
+
+    lAddr <<= 8;
+    lAddr |= sBuffer[3];
+
+    lCount <<= 8;
+    lCount |= sBuffer[5];
 
     return Execute_WRITE_MULTIPLE_REGISTERS(lAddr, lCount);
 }
@@ -472,8 +488,14 @@ uint8_t Parse_WRITE_MULTIPLE_REGISTERS()
 // Device 0x06 AddrH AddrL ValueH ValueL
 uint8_t Parse_WRITE_SINGLE_REGISTER()
 {
-    uint16_t lAddr  = (sBuffer[2] << 8) | sBuffer[3];
-    uint16_t lValue = (sBuffer[4] << 8) | sBuffer[5];
+    uint16_t lAddr  = sBuffer[2];
+    uint16_t lValue = sBuffer[4];
+
+    lAddr <<= 8;
+    lAddr |= sBuffer[3];
+
+    lValue <<= 8;
+    lValue |= sBuffer[5];
 
     return Execute_WRITE_SINGLE_REGISTER(lAddr, lValue);
 }

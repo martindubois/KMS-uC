@@ -450,14 +450,14 @@ void Poll(Context* aThis)
 
             case STATE_KNOWN:
             case STATE_WAIT:
-                aThis->mValues[i] = (lCapture[i] + 0x10000) - aThis->mCaptures[i];
+                aThis->mValues[i] = (uint16_t)((lCapture[i] + 0x10000) - aThis->mCaptures[i]);
                 aThis->mStates[i] = STATE_KNOWN;
                 break;
 
             // default: assert(false);
             }
 
-            aThis->mCaptures   [i] = lCapture[i];
+            aThis->mCaptures   [i] = (uint16_t)(lCapture[i]);
             aThis->mTimeouts_ms[i] = TIMEOUT_ms;
         }
     }    

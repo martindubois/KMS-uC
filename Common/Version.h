@@ -17,8 +17,8 @@
 // Constantes
 /////////////////////////////////////////////////////////////////////////////
 
-#define VERSION_RC   1,0,8,0
-#define VERSION_STR  "1.0.8.0"
+#define VERSION_RC   1,0,9,0
+#define VERSION_STR  "1.0.9.0"
 
 #ifdef __cplusplus
     KMS_VERSION("")

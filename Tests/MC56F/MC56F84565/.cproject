@@ -62,6 +62,9 @@
 								<option id="com.freescale.dsc.cdt.toolchain.compiler.macros.definedMacros.1588985579" name="Defined Macros" superClass="com.freescale.dsc.cdt.toolchain.compiler.macros.definedMacros" valueType="definedSymbols">
 									<listOptionValue builtIn="false" value="_MC56F84565_"/>
 								</option>
+								<option id="com.freescale.dsc.cdt.toolchain.compiler.warnings.warningsFlag.hidden.adjusted.1210133162.adjusted.1481279357" superClass="com.freescale.dsc.cdt.toolchain.compiler.warnings.warningsFlag.hidden.adjusted.1210133162" value="false" valueType="boolean"/>
+								<option id="com.freescale.dsc.cdt.toolchain.compiler.warnings.enableWarnings.hidden.adjusted.2096875861.adjusted.311175304" superClass="com.freescale.dsc.cdt.toolchain.compiler.warnings.enableWarnings.hidden.adjusted.2096875861" value="com.freescale.dsc.cdt.toolchain.warnings.enableWarnings.custom.hidden" valueType="enumerated"/>
+								<option id="com.freescale.dsc.cdt.toolchain.compiler.warnings.implicitConv.1471157024" superClass="com.freescale.dsc.cdt.toolchain.compiler.warnings.implicitConv" value="true" valueType="boolean"/>
 								<inputType id="com.freescale.dsc.cdt.toolchain.compiler.inputType.c.272666464" name="DSC C Compiler Input" superClass="com.freescale.dsc.cdt.toolchain.compiler.inputType.c"/>
 								<inputType id="com.freescale.dsc.cdt.toolchain.compiler.inputType.cpp.184562577" name="DSC C++ Compiler Input" superClass="com.freescale.dsc.cdt.toolchain.compiler.inputType.cpp"/>
 							</tool>

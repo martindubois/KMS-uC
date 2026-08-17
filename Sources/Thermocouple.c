@@ -79,18 +79,21 @@ uint8_t Thermocouple_uV_to_C(const Thermocouple* aThis, int16_t aTempCJ_C, int32
 {
     int16_t lCJ_uV = Table_C_to_uV(aThis->mType->mTable_CJ, aTempCJ_C);
 
-    int16_t lTemp_uV = aIn_uV + lCJ_uV + aThis->mCal_Offset_uV;
+    uint8_t lResult = 0;
 
     const Thermocouple_Table* lTable = aThis->mType->mTable;
 
-    int lResult = 0;
+    int32_t lTemp_uV = aIn_uV;
+
+    lTemp_uV += lCJ_uV;
+    lTemp_uV += aThis->mCal_Offset_uV;
 
     if (lTable->mTable_uV[lTable->mCount - 1] < lTemp_uV)
     {
         lResult = 1;
     }
 
-    *aOut_C = Table_uV_to_C(lTable, lTemp_uV);
+    *aOut_C = Table_uV_to_C(lTable, (int16_t)lTemp_uV);
 
     return lResult;
 }

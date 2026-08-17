@@ -103,7 +103,7 @@ void ADC_Init(const uint8_t* aChannel, uint8_t aChannelQty, uint8_t aInterrupts)
     uint16_t lCtrl1;
     uint16_t lValue;
 
-    unsigned int i;
+    uint8_t i;
 
     *SIM_PCE2 |= 0x0080; // CYCADC
 
