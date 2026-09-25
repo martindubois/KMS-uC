@@ -135,6 +135,20 @@ static const uint16_t SIM_PCE1_BITS[I2C_QTY] = { 0x0040, 0x0020 };
 
 #define TIMEOUT_ms (100)
 
+const I2C_Speed I2C_SPEEDS[I2C_SPEED_QTY] =
+{
+    {   3, 0x00bf }, // 0x3f = 3840 -> ~   3.3 KHz (MULT = 4)
+    {  12, 0x00b3 }, // 0x33 = 1024 -> ~  12   KHz
+    {  24, 0x00ab }, // 0x2b =  512 -> ~  24   KHz
+    {  49, 0x00a3 }, // 0x23 =  256 -> ~  49   KHz
+    {  78, 0x009d }, // 0x1d =  160 -> ~  78   KHz
+    {  98, 0x0097 }, // 0x17 =  128 -> ~  98   KHz
+    { 156, 0x0094 }, // 0x14 =   80 -> ~ 156   KHz
+    { 195, 0x0057 }, // 0x17 =  128 -> ~ 195   KHz (MULT = 2)
+};
+
+const uint8_t I2C_SPEED_DEFAULT = 6;
+
 // Variables
 // //////////////////////////////////////////////////////////////////////////
 
@@ -194,9 +208,10 @@ void I2Cs_Init0()
     }    
 }
 
-void I2C_Init(uint8_t aIndex)
+void I2C_Init(uint8_t aIndex, uint8_t aSpeedIndex)
 {
     // assert(I2C_QTY > aIndex);
+    // assert(I2C_SPEED_QTY > aSpeedIndex);
 
     volatile PortRegs* lR = PORT_REGS + aIndex;
 
@@ -205,7 +220,7 @@ void I2C_Init(uint8_t aIndex)
 
     *SIM_PCE1 |= SIM_PCE1_BITS[aIndex];
 
-    lR->mFreqDiv      = 0x0094; // MULT = 4 | ICR = 20
+    lR->mFreqDiv      = I2C_SPEEDS[aSpeedIndex].mInternal;
     lR->mControl2     = 0;
     lR->mAddress1     = 0;
     lR->mTimeout_High = 0;
@@ -243,6 +258,10 @@ uint8_t I2C_Status(uint8_t aIndex)
         lThis->mState = STATE_IDLE;
         break;
 
+    case STATE_IDLE:
+        lResult = I2C_SUCCESS;
+        break;
+
     case STATE_RX_DATA:
     case STATE_TX_ADDR:
     case STATE_TX_DATA:
@@ -256,7 +275,6 @@ uint8_t I2C_Status(uint8_t aIndex)
     return lResult;
 }
 
-// KNOWN LIMITATION  aOutSize_byte must be at least 2.
 void I2C_Read(uint8_t aIndex, uint8_t aDevice, void* aOut, uint8_t aOutSize_byte)
 {
     // assert(I2C_QTY > aIndex);
@@ -491,9 +509,16 @@ void Interrupt_TX_DEVICE(I2C_Context* aThis, uint16_t aStatus)
         {
             uint16_t lDummy;
         
-            // TODO  Support read of single byte
             lR->mControl1 &= ~ C1_TX;
-            lR->mControl1 &= ~ C1_TXAK;
+            
+            if (1 < aThis->mDataSize_byte)
+            {
+                lR->mControl1 &= ~ C1_TXAK;
+            }
+            else
+            {
+                lR->mControl1 |= C1_TXAK;
+            }
 
             lDummy = lR->mData;
 

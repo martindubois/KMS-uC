@@ -185,7 +185,7 @@ void Test_Main()
         EEPROM_Init(sEEPROMs + 0, 0, 0xa0, EEPROM_WRITE_PROTECT);
         EEPROM_Init(sEEPROMs + 1, 0, 0xa2, EEPROM_WRITE_PROTECT);
 
-        I2C_Init(0);
+        I2C_Init(0, I2C_SPEED_DEFAULT);
 
         for (i = 0; i < 1; i++)
         {
@@ -199,7 +199,7 @@ void Test_Main()
 
         Expander_Init(1, 0x40, EXPANDER_RESET, EXPANDER_DEFAULT_INPUT, EXPANDER_INT, NULL);
 
-        I2C_Init(1);
+        I2C_Init(1, I2C_SPEED_DEFAULT);
 
     #endif
 
@@ -213,7 +213,7 @@ void Test_Main()
 
         I2C_Device_Init(&sI2C_Device, 1, 0);
 
-        I2C_Init(1);
+        I2C_Init(1, 1);
 
     #endif
 
