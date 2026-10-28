@@ -36,6 +36,7 @@ Thermocouple_Type;
 /// \brief Thermocouple description
 typedef struct
 {
+    int16_t mCal_Gain; // fixed point 4.12
     int16_t mCal_Offset_uV;
 
     const Thermocouple_Type* mType;
@@ -52,9 +53,9 @@ extern const Thermocouple_Type Thermocouple_TYPE_R;
 // //////////////////////////////////////////////////////////////////////////
 
 /// \brief Initialize a Thermocouple instance
-/// \param aInit The instance to inisialize
+/// \param aInit The instance to initialize
 /// \param aType Thermocouple_TYPE_...
-/// \see Thermocouple_Calibrate Thermocouple_TYPE_R Thermocouple_uB_to_C
+/// \see Thermocouple_Calibrate Thermocouple_Calibrate2 Thermocouple_TYPE_R Thermocouple_uV_to_C
 extern void Thermocouple_Init(Thermocouple* aThis, const Thermocouple_Type* aType);
 
 /// \brief Convert uV value in temperature
@@ -62,8 +63,8 @@ extern void Thermocouple_Init(Thermocouple* aThis, const Thermocouple_Type* aTyp
 /// \param aTempCJ_C Temperature at the cold junction
 /// \param aIn_uV    The read value
 /// \param aOut_C    The function put the temperature there
-/// \retval false
-/// \retval true
+/// \retval false No overflow
+/// \retval true  Overflow
 /// \see Thermocouple_Init
 extern uint8_t Thermocouple_uV_to_C(const Thermocouple* aThis, int16_t aTempCJ_C, int32_t aIn_uV, int16_t* aOut_C);
 
@@ -72,3 +73,11 @@ extern uint8_t Thermocouple_uV_to_C(const Thermocouple* aThis, int16_t aTempCJ_C
 /// \param aRead_C The indicated temperature
 /// \param aReal_C The real temperature
 extern void Thermocouple_Calibrate(Thermocouple* aThis, int16_t aRead_C, int16_t aReal_C);
+
+/// \brief Modify the calibration
+/// \param aThis   The instance
+/// \param aARead_C The indicated temperature
+/// \param aAReal_C The real temperature
+/// \param aBRead_C The indicated temperature
+/// \param aBReal_C The real temperature
+extern void Thermocouple_Calibrate2(Thermocouple* aThis, int16_t aARead_C, int16_t aAReal_C, int16_t aBRead_C, int16_t aBReal_C);

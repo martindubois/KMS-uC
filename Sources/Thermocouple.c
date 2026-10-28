@@ -70,6 +70,7 @@ static int16_t Table_uV_to_C(const Thermocouple_Table* aThis, int16_t aIn_uV);
 
 void Thermocouple_Init(Thermocouple* aThis, const Thermocouple_Type* aType)
 {
+    aThis->mCal_Gain = 0x1000; // fixed point 4.12 -> Gain = 1.0
     aThis->mCal_Offset_uV = 0;
 
     aThis->mType = aType;
@@ -86,11 +87,19 @@ uint8_t Thermocouple_uV_to_C(const Thermocouple* aThis, int16_t aTempCJ_C, int32
     int32_t lTemp_uV = aIn_uV;
 
     lTemp_uV += lCJ_uV;
+    lTemp_uV *= aThis->mCal_Gain;
+    lTemp_uV += 0x800; // Rouding
+    lTemp_uV >>= 12;
     lTemp_uV += aThis->mCal_Offset_uV;
 
     if (lTable->mTable_uV[lTable->mCount - 1] < lTemp_uV)
     {
         lResult = 1;
+        lTemp_uV = lTable->mTable_uV[lTable->mCount - 1];
+    }
+    else if (lTable->mTable_uV[0] > lTemp_uV)
+    {
+        lTemp_uV = lTable->mTable_uV[0];
     }
 
     *aOut_C = Table_uV_to_C(lTable, (int16_t)lTemp_uV);
@@ -107,6 +116,77 @@ void Thermocouple_Calibrate(Thermocouple* aThis, int16_t aRead_C, int16_t aReal_
     aThis->mCal_Offset_uV = Table_C_to_uV(lTable, aReal_C) - lRead_uV;
 }
 
+void Thermocouple_Calibrate2(Thermocouple* aThis, int16_t aARead_C, int16_t aAReal_C, int16_t aBRead_C, int16_t aBReal_C)
+{
+    // assert(aARead_C < aBRead_C);
+    // assert(aAReal_C < aBReal_C);
+
+    int16_t lDRead_uV;
+    int16_t lDReal_uV;
+    int32_t lGain; // fixed point 20.12
+    int32_t lOffset_uV;
+
+    const Thermocouple_Table* lTable = aThis->mType->mTable;
+
+    // Use the table to convert value in uV
+
+    int16_t lAReal_uV = Table_C_to_uV(lTable, aAReal_C);
+    int16_t lBReal_uV = Table_C_to_uV(lTable, aBReal_C);
+
+    int32_t lARead_uV = Table_C_to_uV(lTable, aARead_C);
+    int32_t lBRead_uV = Table_C_to_uV(lTable, aBRead_C);
+
+    // Remove current offset from the read value
+    lARead_uV -= aThis->mCal_Offset_uV;
+    lBRead_uV -= aThis->mCal_Offset_uV;
+
+    // Remove current gain from the read value
+    if (0 != aThis->mCal_Gain)
+    {
+        lARead_uV <<= 12;
+        lBRead_uV <<= 12;
+
+        lARead_uV /= aThis->mCal_Gain;
+        lBRead_uV /= aThis->mCal_Gain;
+    }
+
+    // Compute the new gain
+
+    lDRead_uV = lBRead_uV - lARead_uV;
+    lDReal_uV = lBReal_uV - lAReal_uV;
+
+    if (0 != lDRead_uV)
+    {
+        lGain = lDReal_uV;
+
+        lGain <<= 12;
+
+        // Rounding
+        if ((lGain < 0) == (lDRead_uV < 0))
+        {
+            lGain += lDRead_uV >> 1;
+        }
+        else
+        {
+            lGain -= lDRead_uV >> 1;
+        }
+
+        lGain /= lDRead_uV;
+
+        // Compute the new offset
+        lOffset_uV = lARead_uV;
+        lOffset_uV *= lGain;
+        lOffset_uV += 0x800; // Rouding
+        lOffset_uV >>= 12;
+        lOffset_uV *= -1;
+        lOffset_uV += lAReal_uV;
+
+        // Apply new calibration
+        aThis->mCal_Gain      = lGain;
+        aThis->mCal_Offset_uV = lOffset_uV;
+    }
+}
+
 // Static function declarations
 // //////////////////////////////////////////////////////////////////////////
 
@@ -115,17 +195,20 @@ int16_t Table_C_to_uV(const Thermocouple_Table* aThis, int16_t aIn_C)
     int16_t lDelta_uV;
     int16_t lIndex;
     int16_t lInterpol_uV;
+    int16_t lRel_C;
 
     const int16_t* lTable_uV = aThis->mTable_uV;
 
     if (aThis->mBegin_C >= aIn_C) { return lTable_uV[0                ]; }
     if (aThis->mEnd_C   <= aIn_C) { return lTable_uV[aThis->mCount - 1]; }
 
-    lIndex = aIn_C / aThis->mStep_C;
+    lRel_C = aIn_C - aThis->mBegin_C;
+
+    lIndex = lRel_C / aThis->mStep_C;
 
     lDelta_uV = lTable_uV[lIndex + 1] - lTable_uV[lIndex];
 
-    lInterpol_uV = (aIn_C % aThis->mStep_C) * lDelta_uV / aThis->mStep_C;
+    lInterpol_uV = ((lRel_C % aThis->mStep_C) * lDelta_uV + (aThis->mStep_C >> 1)) / aThis->mStep_C;
 
     return lTable_uV[lIndex] + lInterpol_uV;
 }
@@ -161,7 +244,7 @@ int16_t Table_uV_to_C(const Thermocouple_Table* aThis, int16_t aIn_uV)
 
     lDelta_uV = lTable_uV[lB] - lTable_uV[lA];
 
-    lInterpol_C = aThis->mStep_C * (aIn_uV - lTable_uV[lA]) / lDelta_uV;
+    lInterpol_C = (aThis->mStep_C * (aIn_uV - lTable_uV[lA]) + (lDelta_uV >> 1)) / lDelta_uV;
 
     return aThis->mBegin_C + (aThis->mStep_C * (int16_t)lA) + lInterpol_C;
 }

@@ -1,6 +1,6 @@
 
 Author    KMS - Martin Dubois, P. Eng.
-Copyright (C) 2025 KMS
+Copyright (C) 2025-2026 KMS
 License   http://www.apache.org/licenses/LICENSE-2.0
 Product   KMS-uC
 File      _DocDev/Build.txt
@@ -15,9 +15,8 @@ File "Common/Version.h" - Edit the Version
 
 Version             ______ . ______ . ______ . ______                     ( )
                     {Ma}     {Mi}     {Bu}            -beta               ( )
-                                                      -dev                ( )
                                                       -test               ( )
-                                                      - _________________ ( )
+                                                      - _________________
                                                         {Type}
 
 File "_DocUser/KMS-uC.ReadMe.txt"                                         [ ]

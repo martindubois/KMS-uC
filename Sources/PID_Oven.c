@@ -8,10 +8,10 @@
 // References
 // //////////////////////////////////////////////////////////////////////////
 
-// Assumptions
-// //////////////////////////////////////////////////////////////////////////
+// Automatisation et Controle - PID
+// http://kms-quebec.ddns.net/fr/AutomationAndControl/PID
 
-// CodeWarrior
+// Assumptions
 // //////////////////////////////////////////////////////////////////////////
 
 // Code
@@ -30,6 +30,8 @@
 
 #define DEFAULT_PERIOD_ms (100)
 
+// The PID output is from 0 to 10000. 0 = heating is completly off, 10000 =
+// heating is at 100 %
 #define OUTPUT_MIN_FP (0)
 #define OUTPUT_MAX_FP (2560000)
 
@@ -71,21 +73,21 @@ void PID_Oven_Tick(PID_Oven* aThis, uint8_t aPeriod_ms)
     aThis->mCounter_ms += aPeriod_ms;
     if (aThis->mPeriod_ms <= aThis->mCounter_ms)
     {
-        int32_t lSetpoint_FP = aThis->mSetpoint();
-        int32_t lError_FP    = lSetpoint_FP - aThis->mInput();
-        int32_t lDelta_FP    = lError_FP - aThis->mError_C_FP;
+        int32_t lSetpoint_C_FP = aThis->mSetpoint();
+        int32_t lError_C_FP    = lSetpoint_C_FP - aThis->mInput();
+        int32_t lDelta_C_FP    = lError_C_FP - aThis->mError_C_FP;
 
-        int32_t lP_FP = lError_FP * aThis->mP;
-        int32_t lI_FP = lError_FP * aThis->mI;
-        int32_t lD_FP = lDelta_FP * aThis->mD;
+        int32_t lP_FP = lError_C_FP * aThis->mP;
+        int32_t lI_FP = lError_C_FP * aThis->mI;
+        int32_t lD_FP = lDelta_C_FP * aThis->mD;
 
         int32_t lOffset_FP;
         int32_t lPD_FP;
 
         aThis->mCounter_ms -= aThis->mPeriod_ms;
-        aThis->mError_C_FP    = lError_FP;
+        aThis->mError_C_FP  = lError_C_FP;
         
-        lOffset_FP = Table_GetValue(aThis->mTable, lSetpoint_FP);
+        lOffset_FP = Table_GetValue(aThis->mTable, lSetpoint_C_FP);
         lOffset_FP <<= 8;
 
         lPD_FP = lOffset_FP + lP_FP + lD_FP;
