@@ -1,6 +1,6 @@
 
 // Author    KMS - Martin Dubois, P. Eng.
-// Copyright (C) 2025 KMS
+// Copyright (C) 2025-2026 KMS
 // License   http://www.apache.org/licenses/LICENSE-2.0
 // Product   KMS-uC
 // File      Includes/Filter_SP.h
@@ -34,10 +34,10 @@ typedef struct
 }
 Filter_SP_Table;
 
-// mDelta_FP    (fixed point 8.8)
+// mDelta_FP    (fixed point 24.8)
 // mInput_FP    (fixed point 24.8)
 // mOutput_FP   (fixed point 24.8)
-// mActual      See Filter_MD_InputFunction
+// mActual      See Filter_SP_InputFunction
 // mSlope_FP    (fixed point 8.8)
 // mCounter_ms  Time since the last iteration
 typedef struct

@@ -5,6 +5,9 @@ License   http://www.apache.org/licenses/LICENSE-2.0
 Product   KMS-uC
 File      _DocUser/KMS-uC.ReadMe.txt
 
+1.0.12 2026-11-05
+* Filter_SP - State machine improvement and better comments
+
 1.0.11 2026-10-28
 * Thermocouple - Gain calibration
 
