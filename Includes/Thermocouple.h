@@ -75,9 +75,11 @@ extern uint8_t Thermocouple_uV_to_C(const Thermocouple* aThis, int16_t aTempCJ_C
 extern void Thermocouple_Calibrate(Thermocouple* aThis, int16_t aRead_C, int16_t aReal_C);
 
 /// \brief Modify the calibration
-/// \param aThis   The instance
+/// \param aThis    The instance
 /// \param aARead_C The indicated temperature
 /// \param aAReal_C The real temperature
 /// \param aBRead_C The indicated temperature
 /// \param aBReal_C The real temperature
-extern void Thermocouple_Calibrate2(Thermocouple* aThis, int16_t aARead_C, int16_t aAReal_C, int16_t aBRead_C, int16_t aBReal_C);
+/// \retval false Error
+/// \retval true  OK
+extern uint8_t Thermocouple_Calibrate2(Thermocouple* aThis, int16_t aARead_C, int16_t aAReal_C, int16_t aBRead_C, int16_t aBReal_C);

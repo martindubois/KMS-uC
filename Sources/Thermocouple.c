@@ -116,15 +116,16 @@ void Thermocouple_Calibrate(Thermocouple* aThis, int16_t aRead_C, int16_t aReal_
     aThis->mCal_Offset_uV = Table_C_to_uV(lTable, aReal_C) - lRead_uV;
 }
 
-void Thermocouple_Calibrate2(Thermocouple* aThis, int16_t aARead_C, int16_t aAReal_C, int16_t aBRead_C, int16_t aBReal_C)
+uint8_t Thermocouple_Calibrate2(Thermocouple* aThis, int16_t aARead_C, int16_t aAReal_C, int16_t aBRead_C, int16_t aBReal_C)
 {
     // assert(aARead_C < aBRead_C);
     // assert(aAReal_C < aBReal_C);
 
-    int16_t lDRead_uV;
+    int32_t lDRead_uV;
     int16_t lDReal_uV;
     int32_t lGain; // fixed point 20.12
     int32_t lOffset_uV;
+    uint8_t lResult = 0;
 
     const Thermocouple_Table* lTable = aThis->mType->mTable;
 
@@ -173,18 +174,28 @@ void Thermocouple_Calibrate2(Thermocouple* aThis, int16_t aARead_C, int16_t aARe
 
         lGain /= lDRead_uV;
 
-        // Compute the new offset
-        lOffset_uV = lARead_uV;
-        lOffset_uV *= lGain;
-        lOffset_uV += 0x800; // Rouding
-        lOffset_uV >>= 12;
-        lOffset_uV *= -1;
-        lOffset_uV += lAReal_uV;
+        if ((-32768 <= lGain) && (32767 >= lGain))
+        {
+            // Compute the new offset
+            lOffset_uV = lARead_uV;
+            lOffset_uV *= lGain;
+            lOffset_uV += 0x800; // Rouding
+            lOffset_uV >>= 12;
+            lOffset_uV *= -1;
+            lOffset_uV += lAReal_uV;
 
-        // Apply new calibration
-        aThis->mCal_Gain      = lGain;
-        aThis->mCal_Offset_uV = lOffset_uV;
+            if ((-32768 <= lOffset_uV) && (32767 >= lOffset_uV))
+            {
+                // Apply new calibration
+                aThis->mCal_Gain      = (int16_t)lGain;
+                aThis->mCal_Offset_uV = (int16_t)lOffset_uV;
+
+                lResult = 1;
+            }
+        }
     }
+
+    return lResult;
 }
 
 // Static function declarations
